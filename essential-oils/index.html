@@ -7,6 +7,7 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; overflow:hidden; background:#0d1117; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; color:#e6edf3; }
+  body.aux-off .aux { visibility:hidden; }
   #app { position:fixed; inset:0; }
   .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
   #ui { top:12px; left:12px; max-width:262px; }
@@ -30,19 +31,19 @@
   #info b { color:#ffd866; }
   #info .big { font-size:18px; }
   #credits { position:fixed; bottom:12px; right:12px; z-index:10; color:#6e7681; font-size:11px; }
-  #merLegend { bottom:12px; left:50%; transform:translateX(-50%); max-width:94vw; display:flex; flex-wrap:wrap; gap:5px 8px; justify-content:center; padding:8px 10px; }
-  #merLegend .chip { display:flex; align-items:center; gap:5px; font-size:11px; white-space:nowrap; padding:2px 7px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
-  #merLegend .chip .sw { width:10px; height:10px; border-radius:2px; flex:0 0 auto; }
+  #merLegend { bottom:46px; right:12px; left:auto; transform:none; max-width:min(320px,88vw); display:flex; flex-wrap:wrap; gap:4px 6px; justify-content:flex-end; padding:7px 9px; }
+  #merLegend .chip { display:flex; align-items:center; gap:4px; font-size:10px; white-space:nowrap; padding:2px 6px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
+  #merLegend .chip .sw { width:8px; height:8px; border-radius:2px; flex:0 0 auto; }
   #merLegend .chip b { color:#e6edf3; font-weight:600; }
   #merLegend .chip span { color:#8b949e; }
   #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
   #merLegend .chip.on b { color:#ffd866; }
   #merLegend .chip.on span { color:#e6edf3; }
   #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
-  #startGate { position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center; background:rgba(13,17,23,.42); cursor:pointer; user-select:none; }
-  #startGate .box { background:rgba(22,27,34,.92); border:1px solid #ffd866; border-radius:14px; padding:26px 42px; text-align:center; backdrop-filter:blur(4px); box-shadow:0 8px 40px rgba(0,0,0,.5); }
-  #startGate .t1 { font-size:20px; color:#ffd866; margin-bottom:10px; }
-  #startGate .t2 { font-size:13px; color:#9aa4b2; line-height:1.9; }
+  #startGate { position:fixed; inset:0; z-index:40; cursor:pointer; user-select:none; background:rgba(13,17,23,.30); }
+  #startGate .box { position:absolute; right:14px; bottom:64px; width:min(290px,80vw); background:rgba(22,27,34,.94); border:1px solid rgba(255,216,102,.5); border-radius:12px; padding:12px 14px; backdrop-filter:blur(4px); box-shadow:0 8px 30px rgba(0,0,0,.5); text-align:left; }
+  #startGate .t1 { font-size:15px; color:#ffd866; margin-bottom:6px; }
+  #startGate .t2 { font-size:12px; color:#9aa4b2; line-height:1.7; }
   #startGate .t2 b { color:#ffd866; font-weight:600; }
   .cardInfo { position:fixed; left:50%; bottom:118px; transform:translateX(-50%); width:min(440px,92vw); max-height:60vh; overflow:auto; z-index:30; background:rgba(20,24,31,.96); border:1px solid rgba(255,216,102,.5); border-radius:14px; padding:12px 15px; box-shadow:0 12px 32px rgba(0,0,0,.55); font-size:13px; line-height:1.6; color:#e6edf3; }
   .cardInfo .ci-x { position:absolute; top:6px; right:9px; color:#8b949e; cursor:pointer; font-size:17px; background:none; border:none; line-height:1; }
@@ -66,7 +67,13 @@
 
 <div id="ui" class="panel">
   <h1>易球 · 精油卡三维映像</h1>
-  <div class="hint">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 单击卡=看卦·油档案 ｜ 档案内可"收走"卡(放大4倍消失) ｜ 双击=立即消失 ｜ 点空白关闭 ｜ 空格 暂停/继续 循经</div>
+  <div class="hint aux">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 单击卡=档案 ｜ 双击=收卡 ｜ 空格=暂停循经</div>
+  <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-top:1px solid #30363d;padding-top:6px;margin-bottom:2px;font-size:12px">
+    <span style="color:#8b949e">牌面：</span>
+    <label style="display:inline-flex;font-size:12px;gap:4px"><input type="radio" name="cv" id="cv-oil" value="oil" checked/> 精油牌</label>
+    <label style="display:inline-flex;font-size:12px;gap:4px"><input type="radio" name="cv" id="cv-gua" value="gua"/> 卦牌</label>
+    <label style="display:inline-flex;font-size:12px;gap:4px;margin-left:auto" title="显示/隐藏 操作提示·层色图例·经络图例·信息条等文字说明"><input type="checkbox" id="t-aux" checked/> 说明</label>
+  </div>
   <label><input type="checkbox" id="t-rotate" /> 自动旋转</label>
   <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>
   <label><input type="checkbox" id="t-para" checked /> 纬线（金色 · 5圈）</label>
@@ -75,7 +82,7 @@
   <label><input type="checkbox" id="t-meri-path" checked /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
   <label><input type="checkbox" id="t-sun" checked /> 太极线（十二消息卦 · 点击可消失）</label>
   <label><input type="checkbox" id="t-yinyang" /> 阴阳两面（半球着色）</label>
-  <div id="legend">
+  <div id="legend" class="aux">
     <div class="row"><span class="dot" style="background:#4a90d9"></span> I层 · 1阳爻（60°S）</div>
     <div class="row"><span class="dot" style="background:#5cb85c"></span> II层 · 2阳爻（30°S）</div>
     <div class="row"><span class="dot" style="background:#f0ad4e"></span> III层 · 3阳爻（赤道）</div>
@@ -83,8 +90,8 @@
     <div class="row"><span class="dot" style="background:#9b59b6"></span> V层 · 5阳爻（60°N）</div>
     <div class="row"><span class="dot" style="background:#ffd866"></span> 乾北极 / 坤南极</div>
     <div class="row" style="margin-top:8px;color:#8b949e;font-size:12px">🃏 64卦=64支精油卡：单击看档案、双击即消；循行时对应消息卦卡自动放大</div>
-    <button id="btnReset" style="width:100%;margin-top:8px;padding:5px 0;border-radius:8px;border:1px solid #30363d;background:rgba(255,216,102,.12);color:#ffd866;cursor:pointer;font-size:13px">♻ 复原全部精油卡</button>
   </div>
+  <button id="btnReset" style="width:100%;margin-top:8px;padding:5px 0;border-radius:8px;border:1px solid #30363d;background:rgba(255,216,102,.12);color:#ffd866;cursor:pointer;font-size:13px">♻ 复原全部牌</button>
 </div>
 
 <div id="layers" class="panel">
@@ -92,13 +99,13 @@
   <div id="layerRows"></div>
 </div>
 
-<div id="info" class="panel"></div>
+<div id="info" class="panel aux"></div>
 <div id="cardInfo" class="cardInfo" style="display:none"></div>
-<div id="merLegend" class="panel"></div>
-<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点长在球面上，正停在 <b>0h·24h 起点（子时胆经）</b>、正对您<br>点击后：白点沿贴在球上的循行路径出发，跑满一整圈<br>球体没有自己的转速/方向 —— 只负责"白点跑到哪一面，就把那一面转到正对我"<br>白点跑完一圈 ⇔ 球体正好追着转满 360°，二者同时回到起点（默认 144s/圈，每经 12s）<br>再按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
+<div id="merLegend" class="panel aux"></div>
+<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点停在 <b>0h·24h 起点（子时胆经）</b>正对您；点击后白点跑满一圈 ⇔ 球体同步转满 360°（默认 144s/圈）<br>按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
 <div id="pauseBadge" class="panel">⏸ 已暂停（空格继续）</div>
 <div id="loading" class="panel" style="top:52px;left:50%;transform:translateX(-50%);color:#ffd866;display:none;"></div>
-<div id="credits">易球精油卡 · 卦卡取材 多特瑞官方素材</div>
+<div id="credits" class="aux">易球精油卡 · 卦卡取材 多特瑞官方素材</div>
 
 <script type="importmap">
 {
@@ -297,6 +304,7 @@ function placeholderCard(n, name, color, w, h){
 const imgLoader = new THREE.TextureLoader();
 window.__dbg.make=0;
 let loadedCount=0;
+let guaMode=false;   // 牌面模式：false=精油牌（默认） / true=卦牌
 function makeCard(n, name, color, isCenter){ window.__dbg.make++;
   // 比例接近精油卡 1240x1754 → 高宽比 1.414；普通卦比球心卦大一号
   const baseW = isCenter ? 0.62 : 0.92;
@@ -308,14 +316,16 @@ function makeCard(n, name, color, isCenter){ window.__dbg.make++;
   const sp = new THREE.Sprite(mat);
   sp.scale.set(baseW, baseH, 1);
   sp.cardBase=[baseW, baseH];
+  sp.phTex=phTex;   // 加载占位（未就绪前的精油牌纹理）
   if(!CARD_TEX[n]){
     // 真图加载：失败自动重试最多 3 次，避免弱网下个别卡永远停在"卦名占位卡"
     (function loadCardImg(attempt){
       CARD_TEX[n]=imgLoader.load('cards/'+n+'.jpg', tex=>{
         tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=4;
         loadedCount++;
+        sp.oilTex=tex;   // 精油图缓存（供"精油牌"模式随时切回）
         const m=mat;
-        if(m){ m.map=tex; m.needsUpdate=true; }
+        if(m && !guaMode){ m.map=tex; m.needsUpdate=true; }   // 卦牌模式下不覆盖当前卦牌纹理
         const el=document.getElementById('loading');
         if(el){
           if(loadedCount<64){ el.style.display='block'; el.textContent='精油卡载入中 '+loadedCount+'/64'; }
@@ -340,6 +350,52 @@ function makeCard(n, name, color, isCenter){ window.__dbg.make++;
   }
   return sp;
 }
+// ---------- 卦牌纹理（六爻卦象牌，供"牌面：卦牌"模式） ----------
+const TRIGRAM_GLYPH = {乾:'☰',兑:'☱',离:'☲',震:'☳',巽:'☴',坎:'☵',艮:'☶',坤:'☷'};
+function makeGuaTex(n, name, upper, lower, color){
+  const w=128, h=Math.round(w*1.414);
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d');
+  x.fillStyle='rgba(13,17,23,0.94)';
+  const rr=Math.min(w,h)*0.09;
+  x.beginPath(); x.moveTo(rr,0); x.arcTo(w,0,w,h,rr); x.arcTo(w,h,0,h,rr); x.arcTo(0,h,0,0,rr); x.arcTo(0,0,w,0,rr); x.closePath(); x.fill();
+  x.strokeStyle=color; x.lineWidth=2; x.stroke();
+  x.textAlign='center'; x.textBaseline='middle';
+  x.fillStyle='#8b949e'; x.font=`bold ${Math.round(h*0.042)}px "PingFang SC",sans-serif`;
+  x.fillText('第 '+n+' 卦', w/2, h*0.10);
+  x.fillStyle=color; x.font=`bold ${Math.round(h*0.115)}px "PingFang SC","Microsoft YaHei",sans-serif`;
+  x.fillText(name, w/2, h*0.29);
+  x.font=`${Math.round(h*0.13)}px "PingFang SC",sans-serif`; x.fillStyle='#e6edf3';
+  x.fillText((TRIGRAM_GLYPH[upper]||'')+'　'+(TRIGRAM_GLYPH[lower]||''), w/2, h*0.52);
+  x.fillStyle='#6e7681'; x.font=`bold ${Math.round(h*0.036)}px sans-serif`;
+  x.fillText('上'+upper+' · 下'+lower, w/2, h*0.65);
+  // 六爻横线：下卦三爻在下、上卦三爻在上；1=阳实线 0=阴断线
+  const lines=[...TRIGRAM_LINES[lower], ...TRIGRAM_LINES[upper]];
+  const cx=w/2, barW=Math.round(w*0.52), lh=Math.round(h*0.073), yTop=Math.round(h*0.76);
+  for(let i=0;i<6;i++){
+    const y=yTop+(5-i)*lh;
+    if(lines[i]===1){ x.fillStyle=color; x.fillRect(cx-barW/2, y-2, barW, 4); }
+    else { x.fillStyle='#8b949e'; const seg=(barW-8)/2; x.fillRect(cx-barW/2, y-2, seg, 4); x.fillRect(cx+barW/2-seg, y-2, seg, 4); }
+  }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+function setCardMode(gua){
+  guaMode=gua;
+  for(const rec of cardRecs){
+    const sp=rec.sp, mat=sp.material; if(!mat) continue;
+    if(!rec.removed){
+      if(gua){
+        if(!sp.guaTex) sp.guaTex=makeGuaTex(rec.n, sp.userData.name, sp.userData.upper, sp.userData.lower, rec.color);
+        mat.map=sp.guaTex;
+      } else {
+        mat.map = sp.oilTex || sp.phTex;
+      }
+      mat.needsUpdate=true;
+    }
+  }
+}
+window.__dbg.setCardMode=setCardMode;   // 调试：window.__dbg.setCardMode(true/false)
 function toXYZ(lat,lon,rad){
   const la=lat*Math.PI/180, lo=lon*Math.PI/180;
   return new THREE.Vector3(rad*Math.cos(la)*Math.cos(lo), rad*Math.sin(la), rad*Math.cos(la)*Math.sin(lo));
@@ -366,7 +422,7 @@ for(const h of HEX){ window.__dbg.loop++;
   else lpos = toXYZ(info.lat, info.lon, R*1.20);
   const lab = makeCard(n, h[1], color, info.center); lab.position.copy(lpos);
   lab.userData = ud; layerGroups[key].add(lab);
-  cardRecs.push({sp:lab, dot, n, baseW:lab.cardBase[0], baseH:lab.cardBase[1], removed:false, key});
+  cardRecs.push({sp:lab, dot, n, baseW:lab.cardBase[0], baseH:lab.cardBase[1], removed:false, key, color});
 }
 const cardSprites = cardRecs.map(c=>c.sp);
 
@@ -748,6 +804,11 @@ document.getElementById('t-yinyang').addEventListener('change', e=> yyGroup.visi
 document.getElementById('t-sun').addEventListener('change', e=> sunGroup.visible = e.target.checked);
 let curPeriod = FLOW_PERIOD;   // 共用周期：循行走满一圈的秒数 = 球体转动 360° 的秒数（1:1 同步；默认 144s，每经 144/12=12s 平均）
 document.getElementById('t-ball').addEventListener('change', e=>{ curPeriod = parseFloat(e.target.value) || FLOW_PERIOD; flowUniforms.uPeriod.value = curPeriod; });
+
+// 牌面切换：精油牌 / 卦牌
+document.querySelectorAll('input[name="cv"]').forEach(r=> r.addEventListener('change', e=>{ if(e.target.checked) setCardMode(e.target.value==='gua'); }));
+// "说明"总开关：隐藏/显示 操作提示·层色图例·经络图例·信息条等（.aux 元素）
+document.getElementById('t-aux').addEventListener('change', e=> document.body.classList.toggle('aux-off', !e.target.checked));
 
 // ---------- 卦图示例（图例） ----------
 (function(){
