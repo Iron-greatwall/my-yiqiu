@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="41ojZsP56ETJ4ar0tv6HV1">
+<head data-page-node-id="X4GmZonpMFPeswbsaWlnRy">
+<meta charset="UTF-8" data-page-node-id="3MYRbMMwcXSMdCamKPZQCL" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="HWLO22bKsHAentHG3nORCq" />
+<title>易球 · 精油卡三维映像</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0d1117; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; color:#e6edf3; }
+  #app { position:fixed; inset:0; }
+  .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
+  #ui { top:12px; left:12px; max-width:262px; }
+  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; }
+  #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
+  #ui label { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+  #ui input { accent-color:#ffd866; }
+  #legend { margin-top:10px; border-top:1px solid #30363d; padding-top:8px; }
+  #legend .row { display:flex; align-items:center; gap:6px; }
+  #legend .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+  #legend .ln { width:18px; height:0; border-top:3px solid; display:inline-block; }
+  #layers { top:12px; right:12px; min-width:200px; }
+  #layers h2 { font-size:14px; margin-bottom:8px; color:#ffd866; }
+  .lrow { display:flex; align-items:center; gap:8px; padding:5px 7px; border-radius:7px; cursor:pointer; user-select:none; }
+  .lrow:hover { background:rgba(255,255,255,.06); }
+  .lrow .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+  .lrow .txt { flex:1; }
+  .lrow.off { opacity:.42; }
+  .lrow.off .txt { text-decoration:line-through; }
+  #info { bottom:12px; left:12px; min-width:220px; display:none; }
+  #info b { color:#ffd866; }
+  #info .big { font-size:18px; }
+  #credits { position:fixed; bottom:12px; right:12px; z-index:10; color:#6e7681; font-size:11px; }
+  #merLegend { bottom:12px; left:50%; transform:translateX(-50%); max-width:94vw; display:flex; flex-wrap:wrap; gap:5px 8px; justify-content:center; padding:8px 10px; }
+  #merLegend .chip { display:flex; align-items:center; gap:5px; font-size:11px; white-space:nowrap; padding:2px 7px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
+  #merLegend .chip .sw { width:10px; height:10px; border-radius:2px; flex:0 0 auto; }
+  #merLegend .chip b { color:#e6edf3; font-weight:600; }
+  #merLegend .chip span { color:#8b949e; }
+  #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
+  #merLegend .chip.on b { color:#ffd866; }
+  #merLegend .chip.on span { color:#e6edf3; }
+  #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
+  #startGate { position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center; background:rgba(13,17,23,.42); cursor:pointer; user-select:none; }
+  #startGate .box { background:rgba(22,27,34,.92); border:1px solid #ffd866; border-radius:14px; padding:26px 42px; text-align:center; backdrop-filter:blur(4px); box-shadow:0 8px 40px rgba(0,0,0,.5); }
+  #startGate .t1 { font-size:20px; color:#ffd866; margin-bottom:10px; }
+  #startGate .t2 { font-size:13px; color:#9aa4b2; line-height:1.9; }
+  #startGate .t2 b { color:#ffd866; font-weight:600; }
+  .cardInfo { position:fixed; left:50%; bottom:118px; transform:translateX(-50%); width:min(440px,92vw); max-height:60vh; overflow:auto; z-index:30; background:rgba(20,24,31,.96); border:1px solid rgba(255,216,102,.5); border-radius:14px; padding:12px 15px; box-shadow:0 12px 32px rgba(0,0,0,.55); font-size:13px; line-height:1.6; color:#e6edf3; }
+  .cardInfo .ci-x { position:absolute; top:6px; right:9px; color:#8b949e; cursor:pointer; font-size:17px; background:none; border:none; line-height:1; }
+  .cardInfo .ci-top { display:flex; gap:12px; align-items:flex-start; }
+  .cardInfo .ci-img { width:56px; border-radius:8px; border:1px solid rgba(255,216,102,.5); flex:0 0 auto; }
+  .cardInfo .ci-gua { color:#ffd866; font-weight:700; font-size:16px; }
+  .cardInfo .ci-mer { color:#2dd4ff; font-size:12px; margin:1px 0 3px; }
+  .cardInfo .ci-oil { font-size:15px; font-weight:700; }
+  .cardInfo .ci-oil small { color:#8b949e; font-weight:400; }
+  .cardInfo table { width:100%; border-collapse:collapse; margin-top:7px; }
+  .cardInfo table td { border-top:1px solid #2d333b; padding:3px 0; vertical-align:top; word-break:break-word; }
+  .cardInfo table td.k { color:#8b949e; white-space:nowrap; width:70px; padding-right:8px; }
+  .cardInfo .ci-scene { color:#ffd866; }
+  .cardInfo .ci-btn { display:block; width:100%; margin-top:9px; padding:6px 0; border-radius:8px; border:1px solid rgba(255,216,102,.55); background:rgba(255,216,102,.12); color:#ffd866; cursor:pointer; font-size:13px; }
+  .cardInfo .ci-note { color:#6e7681; font-size:11px; margin-top:6px; }
+  .cardInfo::-webkit-scrollbar { width:6px; } .cardInfo::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+</style>
+</head>
+<body data-page-node-id="2liERPfGg89fbDoJNvL2nu">
+<div id="app" data-page-node-id="WDeQs3YmqvsM8sB9WIsvS7"></div>
+
+<div id="ui" class="panel" data-page-node-id="zEmjaXqrCVGV3fD1lYJc77">
+  <h1 data-page-node-id="MQYVfttmTAZckBaj4zWVT4">易球 · 精油卡三维映像</h1>
+  <div class="hint" data-page-node-id="I0qGM998pRRzxwIbuXEZKB">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 单击卡=看卦·油档案 ｜ 档案内可"收走"卡(放大4倍消失) ｜ 双击=立即消失 ｜ 点空白关闭 ｜ 空格 暂停/继续 循经</div>
+  <label data-page-node-id="MKxW6HtAWwJHaqFTufwnvA"><input type="checkbox" id="t-rotate" data-page-node-id="No7MqsvrXC7fAPPCHdR50T" /> 自动旋转</label>
+  <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>
+  <label data-page-node-id="MyhDrsm2QfjrYgiKjBWTGa"><input type="checkbox" id="t-para" checked data-page-node-id="W0qSqDk4yBOGk0kgbqc3VL" /> 纬线（金色 · 5圈）</label>
+  <label data-page-node-id="MkDSwxEdiP4vz6lkI2WJD6"><input type="checkbox" id="t-meri" checked data-page-node-id="g0XjrDMZIoI4qEXdEJtemF" /> 经线（青色 · 12条）</label>
+  <label data-page-node-id="SzbDpPk3Yu9hSzFO01crJz"><input type="checkbox" id="t-meri-fine" checked data-page-node-id="f2GduHovHxi8pfaXeDjYJu" /> 经线辅助（青淡 · 每15°·24条）</label>
+  <label data-page-node-id="8C8D1T0yoslLq21YPqWb4w"><input type="checkbox" id="t-meri-path" checked data-page-node-id="zJIh7Et4WCSolKgSoUiIV6" /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
+  <label data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l2"><input type="checkbox" id="t-sun" checked data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l3" /> 太极线（十二消息卦 · 点击可消失）</label>
+  <label data-page-node-id="ueUmZdopWwMmwCbkyEI3vX"><input type="checkbox" id="t-yinyang" data-page-node-id="5eQQ2GEfgskltHE8ZYQdBD" /> 阴阳两面（半球着色）</label>
+  <div id="legend" data-page-node-id="ZeiqRlLCXWi3WFnuIC4iB7">
+    <div class="row" data-page-node-id="W4UROllz0tqKymnxScPxLF"><span class="dot" style="background:#4a90d9" data-page-node-id="rbK5lPfbEfZO1CkoURNOOH"></span> I层 · 1阳爻（60°S）</div>
+    <div class="row" data-page-node-id="teIMI4iJKYOib0SwHTpASu"><span class="dot" style="background:#5cb85c" data-page-node-id="G9khZmvXjHEHC2YHxp25Zo"></span> II层 · 2阳爻（30°S）</div>
+    <div class="row" data-page-node-id="jYCOIMj6Ww4FFx98CSDAu9"><span class="dot" style="background:#f0ad4e" data-page-node-id="ruyOBvl8omHJ8TnqvfPF4S"></span> III层 · 3阳爻（赤道）</div>
+    <div class="row" data-page-node-id="V5IPq06Ns9gymeie4Ojllb"><span class="dot" style="background:#e8643c" data-page-node-id="K93Hhdu7QEfZvHBGIWUbvR"></span> IV层 · 4阳爻（30°N）</div>
+    <div class="row" data-page-node-id="HX9eqkLRELYFtXrwbegx6i"><span class="dot" style="background:#9b59b6" data-page-node-id="rn2R5YotaApAjUNbSi7Az6"></span> V层 · 5阳爻（60°N）</div>
+    <div class="row" data-page-node-id="YFaP8oVFNBonL3dGJE9I1y"><span class="dot" style="background:#ffd866" data-page-node-id="t7bOcz3YlOhKsZD4Lh6ORH"></span> 乾北极 / 坤南极</div>
+    <div class="row" style="margin-top:8px;color:#8b949e;font-size:12px">🃏 64卦=64支精油卡：单击看档案、双击即消；循行时对应消息卦卡自动放大</div>
+    <button id="btnReset" style="width:100%;margin-top:8px;padding:5px 0;border-radius:8px;border:1px solid #30363d;background:rgba(255,216,102,.12);color:#ffd866;cursor:pointer;font-size:13px">♻ 复原全部精油卡</button>
+  </div>
+</div>
+
+<div id="layers" class="panel" data-page-node-id="QDTP3AkhAYgq3qWCZGz9SD">
+  <h2 data-page-node-id="sWMstl1rycAwC4HE4D09o9">图层（点此隐藏 / 显示）</h2>
+  <div id="layerRows" data-page-node-id="fkhTwFKQ6CgsxigSsjI97K"></div>
+</div>
+
+<div id="info" class="panel" data-page-node-id="C4VJM8rMJuZdad31lnqlj0"></div>
+<div id="cardInfo" class="cardInfo" style="display:none"></div>
+<div id="merLegend" class="panel" data-page-node-id="MStTEkv30uJl2KQ3qwGF0D"></div>
+<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点长在球面上，正停在 <b>0h·24h 起点（子时胆经）</b>、正对您<br>点击后：白点沿贴在球上的循行路径出发，跑满一整圈<br>球体没有自己的转速/方向 —— 只负责"白点跑到哪一面，就把那一面转到正对我"<br>白点跑完一圈 ⇔ 球体正好追着转满 360°，二者同时回到起点（默认 144s/圈，每经 12s）<br>再按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
+<div id="pauseBadge" class="panel" data-page-node-id="MtuxJ58u9YBBZBtPyOLOBD">⏸ 已暂停（空格继续）</div>
+<div id="loading" class="panel" style="top:52px;left:50%;transform:translateX(-50%);color:#ffd866;display:none;"></div>
+<div id="credits" data-page-node-id="1CCagIRxLF1lmqmfLOvBXA">易球精油卡 · 卦卡取材 多特瑞官方素材</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+window.__dbg={loop:0,cards:0,flow:false,anim:false,errs:[]};
+window.addEventListener('error',e=>window.__dbg.errs.push('err:'+e.message));
+window.addEventListener('unhandledrejection',e=>window.__dbg.errs.push('un:'+String((e.reason&&e.reason.message)||e.reason)));
+
+// ---------- 数据 ----------
+const TRIGRAM_YANG = {乾:3,兑:2,离:2,震:1,巽:2,坎:1,艮:1,坤:0};
+const TRIGRAM_LINES = {乾:[1,1,1],兑:[0,1,1],离:[1,0,1],震:[1,0,0],巽:[1,1,0],坎:[0,1,0],艮:[0,0,1],坤:[0,0,0]};
+const HEX = [
+ [1,'乾','乾','乾'],[2,'坤','坤','坤'],[3,'屯','坎','震'],[4,'蒙','艮','坎'],
+ [5,'需','坎','乾'],[6,'讼','乾','坎'],[7,'师','坤','坎'],[8,'比','坎','坤'],
+ [9,'小畜','巽','乾'],[10,'履','乾','兑'],[11,'泰','坤','乾'],[12,'否','乾','坤'],
+ [13,'同人','乾','离'],[14,'大有','离','乾'],[15,'谦','坤','艮'],[16,'豫','震','坤'],
+ [17,'随','兑','震'],[18,'蛊','艮','巽'],[19,'临','坤','兑'],[20,'观','巽','坤'],
+ [21,'噬嗑','离','震'],[22,'贲','艮','离'],[23,'剥','艮','坤'],[24,'复','坤','震'],
+ [25,'无妄','乾','震'],[26,'大畜','艮','乾'],[27,'颐','艮','震'],[28,'大过','兑','巽'],
+ [29,'坎','坎','坎'],[30,'离','离','离'],[31,'咸','兑','艮'],[32,'恒','震','巽'],
+ [33,'遁','乾','艮'],[34,'大壮','震','乾'],[35,'晋','离','坤'],[36,'明夷','坤','离'],
+ [37,'家人','巽','离'],[38,'睽','离','兑'],[39,'蹇','坎','艮'],[40,'解','震','坎'],
+ [41,'损','艮','兑'],[42,'益','巽','震'],[43,'夬','兑','乾'],[44,'姤','乾','巽'],
+ [45,'萃','兑','坤'],[46,'升','坤','巽'],[47,'困','兑','坎'],[48,'井','坎','巽'],
+ [49,'革','兑','离'],[50,'鼎','离','巽'],[51,'震','震','震'],[52,'艮','艮','艮'],
+ [53,'渐','巽','艮'],[54,'归妹','震','兑'],[55,'丰','震','离'],[56,'旅','离','艮'],
+ [57,'巽','巽','巽'],[58,'兑','兑','兑'],[59,'涣','巽','坎'],[60,'节','坎','兑'],
+ [61,'中孚','巽','兑'],[62,'小过','震','艮'],[63,'既济','坎','离'],[64,'未济','离','坎']
+];
+const yang = h => TRIGRAM_YANG[h[2]] + TRIGRAM_YANG[h[3]];
+const MESSAGE = {11:0,34:30,43:60,1:90,44:120,33:150,12:180,20:210,23:240,2:270,24:300,19:330};
+const CENTER = {II:[29,51,52], IV:[30,57,58], III:[63,64]};
+const latOfLayer = L => ({I:-60,II:-30,III:0,IV:30,V:60}[L]);
+const LAYER_COLOR = {I:'#4a90d9',II:'#5cb85c',III:'#f0ad4e',IV:'#e8643c',V:'#9b59b6',pole:'#ffd866'};
+const LAYER_META = {
+  I:{t:'I层 · 1阳 · 60°S', c:LAYER_COLOR.I},
+  II:{t:'II层 · 2阳 · 30°S', c:LAYER_COLOR.II},
+  III:{t:'III层 · 3阳 · 赤道', c:LAYER_COLOR.III},
+  IV:{t:'IV层 · 4阳 · 30°N', c:LAYER_COLOR.IV},
+  V:{t:'V层 · 5阳 · 60°N', c:LAYER_COLOR.V},
+  pole:{t:'两极 · 乾(北) 坤(南)', c:LAYER_COLOR.pole}
+};
+const SUN_ORDER = [11,34,43,1,44,33,12,20,23,2,24,19];
+// ---------- 卦→精油 映射 + 档案（B3/A4 数据；油名取自64卦精油图卡素材文件名） ----------
+const OIL = {"1":{"gua":"乾为天","oil":"乳香"},"2":{"gua":"坤为地","oil":"广藿香"},"3":{"gua":"水雷屯","oil":"丝柏"},"4":{"gua":"山水蒙","oil":"快乐鼠尾草"},"5":{"gua":"水天需","oil":"薰衣草"},"6":{"gua":"天水讼","oil":"椒样薄荷"},"7":{"gua":"地水师","oil":"黑胡椒"},"8":{"gua":"水地比","oil":"野橘"},"9":{"gua":"风天小畜","oil":"柠檬"},"10":{"gua":"天泽履","oil":"罗马洋甘菊"},"11":{"gua":"地天泰","oil":"天竺葵"},"12":{"gua":"天地否","oil":"马郁兰"},"13":{"gua":"天火同人","oil":"佛手柑"},"14":{"gua":"火天大有","oil":"圆柚"},"15":{"gua":"地山谦","oil":"岩兰草"},"16":{"gua":"雷地豫","oil":"红柑"},"17":{"gua":"泽雷随","oil":"红橘"},"18":{"gua":"山风蛊","oil":"迷迭香"},"19":{"gua":"地泽临","oil":"小豆蔻"},"20":{"gua":"风地观","oil":"苦橙叶"},"21":{"gua":"火雷噬嗑","oil":"斯里兰卡肉桂皮"},"22":{"gua":"山火贲","oil":"依兰依兰"},"23":{"gua":"山地剥","oil":"雪松"},"24":{"gua":"地雷复","oil":"绿薄荷"},"25":{"gua":"天雷无妄","oil":"姜黄"},"26":{"gua":"山天大畜","oil":"檀香"},"27":{"gua":"山雷颐","oil":"小茴香"},"28":{"gua":"泽风大过","oil":"永久花"},"29":{"gua":"坎为水","oil":"蓝艾菊"},"30":{"gua":"离为火","oil":"橙花"},"31":{"gua":"泽山咸","oil":"茉莉"},"32":{"gua":"雷风恒","oil":"百里香"},"33":{"gua":"天山遁","oil":"道格拉斯冷杉"},"34":{"gua":"雷天大壮","oil":"黑云杉"},"35":{"gua":"火地晋","oil":"柑橘绚烂"},"36":{"gua":"地火明夷","oil":"没药"},"37":{"gua":"风火家人","oil":"抚慰"},"38":{"gua":"火泽睽","oil":"生姜"},"39":{"gua":"水山蹇","oil":"杜松浆果"},"40":{"gua":"雷水解","oil":"尤加利树"},"41":{"gua":"山泽损","oil":"DDR完美修护"},"42":{"gua":"风雷益","oil":"元气"},"43":{"gua":"泽天夬","oil":"西班牙牛至"},"44":{"gua":"天风姤","oil":"香蜂草"},"45":{"gua":"泽地萃","oil":"柑橘清新"},"46":{"gua":"地风升","oil":"穗甘松"},"47":{"gua":"泽水困","oil":"花样年华焕肤油"},"48":{"gua":"水风井","oil":"芫荽"},"49":{"gua":"泽火革","oil":"欢欣"},"50":{"gua":"火风鼎","oil":"静谧"},"51":{"gua":"震为雷","oil":"罗勒"},"52":{"gua":"艮为山","oil":"侧柏"},"53":{"gua":"风山渐","oil":"木兰花"},"54":{"gua":"雷泽归妹","oil":"仕女"},"55":{"gua":"雷火丰","oil":"热情"},"56":{"gua":"火山旅","oil":"天然防护"},"57":{"gua":"巽为风","oil":"柠檬草"},"58":{"gua":"兑为泽","oil":"乐释"},"59":{"gua":"风水涣","oil":"净化清新"},"60":{"gua":"水泽节","oil":"安宁神气"},"61":{"gua":"风泽中孚","oil":"安定情绪"},"62":{"gua":"雷山小过","oil":"舒缓"},"63":{"gua":"水火既济","oil":"保卫"},"64":{"gua":"火水未济","oil":"新瑞活力"}};
+const OILPROF = {"1":{"en":"Olibanum","lat":"Boswellia carterii, sacra, papyrifera, and freeana","fam":"橄榄科乳香属","part":"树脂","chem":"α-蒎烯 / 柠檬烯 / α-侧柏烯","scene":"#温暖冥想 #宁谧安心 #呵护身心 #焕发活力"},"2":{"en":"Patchouli","lat":"Pogostemon cablin","fam":"唇形科刺蕊草属","part":"叶片","chem":"广藿香醇 / α-布藜烯 / α-愈创烯","scene":"#激励热情 #享受时光 #温暖呵护 #放松身心"},"11":{"en":"Geranium","lat":"Pelargonium graveolens","fam":"牻牛儿科天竺葵属","part":"花朵、叶片","chem":"香茅醇 / 香叶醇","scene":"#平衡身心 #心情愉悦 #馥郁香氛 #香气随行"},"12":{"en":"Marjoram","lat":"Origanum majorana","fam":"唇形科牛至属","part":"叶片","chem":"松油烯-4-醇 / 反式水合桧烯 / γ-松油烯","scene":"#清新香气 #舒畅身心 #芬芳沐浴 #卸下压力"},"19":{"en":"Cardamom Oil","lat":"Elettaria cardamomum","fam":"姜科小豆蔻属","part":"种子","chem":"乙酸松油酯 / 1,8-桉叶素 / 芳樟醇","scene":"#温暖身心 #焕发活力 #畅享自在呼吸"},"20":{"en":"Petitgrain","lat":"Citrus aurantium","fam":"芸香科柑橘属","part":"叶片、枝条","chem":"乙酸芳樟酯 / 芳樟醇 / α-松油醇","scene":"#洗刷疲惫 #轻松自在 #天然的家居清洁剂"},"23":{"en":"Cedarwood","lat":"Juniperus virginiana","fam":"柏科刺柏属","part":"木材","chem":"α-雪松烯 / 雪松醇 / 罗汉柏烯","scene":"#畅享森林般的呼吸 #清雅幽香 #一夜好眠"},"24":{"en":"Spearmint","lat":"Mentha spicata","fam":"唇形科薄荷属","part":"叶片","chem":"香芹酮 / 柠檬烯","scene":"#提神醒脑 #专注当下 #安全驾驶 #香气随行"},"33":{"en":"Douglas Fir","lat":"Pseudotsuga menziesii","fam":"松科黄杉属","part":"枝条、叶片","chem":"β-蒎烯 / α-蒎烯 / δ-3-蒈烯 / 桧烯","scene":"#清新畅快森呼吸 #快乐成长 #朝气蓬勃"},"34":{"en":"Black Spruce","lat":"Picea mariana","fam":"松科云杉属","part":"枝条、树叶","chem":"乙酸龙脑酯 / α-蒎烯 / 茨烯 / 3-蒈烯","scene":"#清新空气 #自在呼吸 #舒缓身心 #释放压力"},"43":{"en":"Origanum","lat":"Origanum vulgare","fam":"唇形科牛至属","part":"叶片","chem":"香荆芥酚 / 百里香酚","scene":"#西餐好伴侣，增添美食风味 #洁净安心，品质生活"},"44":{"en":"Melissa","lat":"Melissa officinalis","fam":"唇形科蜜蜂花属","part":"叶片","chem":"柠檬醛 / 大根香叶烯 D / 橙花醛 / β-石竹烯","scene":"#缓解忧虑 #放下恐惧 #畅享呼吸 #清新自在"},"52":{"en":"Arborvitae","lat":"Thuja Plicata","fam":"","part":"","chem":"","scene":""},"8":{"en":"Wild Orange","lat":"Citrus sinensis","fam":"芸香科柑橘属","part":"果皮","chem":"柠檬烯","scene":"#提振心情 #活力充沛 #居家清洁 #清新香气"},"17":{"en":"Tangerine","lat":"Citrus reticulata","fam":"芸香科柑橘属","part":"果皮","chem":"柠檬烯","scene":"#增添风味 #愉悦心情 #冰橘祛味 #清新扑鼻"},"28":{"en":"Helichrysum","lat":"Helichrysum italicum","fam":"菊科蜡菊属","part":"花朵","chem":"乙酸橙花酯/α-蒎烯/γ-姜黄烯","scene":"#香甜温和 #疏通情绪 #随身香氛 #甜美相伴"},"37":{"en":"Console","lat":"","fam":"","part":"","chem":"","scene":"#抚慰情绪 #正向思考 #静心凝神 #悠悠入眠"},"46":{"en":"Spikenard","lat":"Nardostachys jatamansi","fam":"败酱科甘松香属","part":"根部","chem":"缬草酮","scene":"#提振心神 #自信满满 #平衡情绪 #稳定自我"},"53":{"en":"Magnolia","lat":"Michelia alba","fam":"木兰科含笑属","part":"花朵","chem":"芳樟醇","scene":"#温柔呵护 #柔美香气 #心情愉悦 #缓和情绪"},"60":{"en":"Lavender Peace","lat":"","fam":"","part":"","chem":"","scene":"#放松平和 #身心平衡 #静心凝神 #舒缓压力"},"7":{"en":"Black Pepper","lat":"Piper nigrum","fam":"胡椒科胡椒属","part":"果实","chem":"β-石竹烯/柠檬烯/桧烯","scene":"#舌尖上绽放的温暖滋味 #顺畅挥汗 #欢乐运动"},"16":{"en":"Red Mandrain","lat":"Citrus reticulata","fam":"芸香科柑橘属","part":"果皮","chem":"柠檬烯","scene":"#提振精神 #点亮心情 #空间香氛 #提升能量"},"27":{"en":"Fennel","lat":"Foeniculum vulgare","fam":"伞形科茴香属","part":"种子","chem":"反式茴香脑/α-蒎烯","scene":"#增添饮食独特风味 #鼓舞自信 #激励身心"},"36":{"en":"Myrrh","lat":"Commiphora myrrha","fam":"橄榄科没药属","part":"树脂","chem":"呋喃桉-1,3-二烯/莪术烯","scene":"#倾听内心 #安抚心绪 #增添活力 #活跃思维"},"45":{"en":"Citrus Bliss","lat":"","fam":"","part":"","chem":"野橘/清新香气 ·柑橘/充满活力 ·柠檬/青涩滋味 ·克莱门汀/低调沉稳 ·圆柚/轻盈舞动 ·香草萃取物/温暖甜美 ·佛手柑/一抹暖阳","scene":"#清新甜美 #美妙呼吸 #自然芬芳 #幽香萦绕"},"59":{"en":"Purify","lat":"","fam":"","part":"","chem":"柠檬/清爽舒畅 ·西伯利亚冷杉/清新旷远 ·莱姆/自然留香 ·香茅/温暖清新 ·松针/平衡放松 ·茶树/天然洁净 ·欧洲冷杉/清新爽快 ·芫荽叶/温和提振","scene":"#改善异味 #自然留香 #轻松搞定大扫除"},"6":{"en":"Peppermint","lat":"Mentha piperita","fam":"唇形科薄荷属","part":"整株植物","chem":"薄荷醇","scene":"#提神醒脑 #沁人心脾 #清新空气 #自由呼吸"},"15":{"en":"Vetiver","lat":"Vetiveria zizanioides","fam":"禾本科香根草属","part":"根部","chem":"异朱栾倍半萜/客烯醇","scene":"#镇定不安的情绪 #专注四散的思维"},"26":{"en":"Sandalwood","lat":"Santalum album","fam":"檀香科檀香属","part":"木材","chem":"α-檀香醇/β-檀香醇","scene":"#安神净心 #内观冥想 #亲密无间 #温馨浪漫"},"35":{"en":"Citrus Bloom","lat":"","fam":"","part":"","chem":"野橘/阳光清新、木兰花/甜美放松、圆柚/轻盈舞动、薰衣草/宁静柔和、罗马洋甘菊/清爽温柔","scene":"#提振精神 #舒缓放松 #愉悦心情 #激发创造力"},"42":{"en":"Zendocrine","lat":"","fam":"","part":"","chem":"红橘/元气满满、迷迭香/提升活力、芫荽叶/温和提振","scene":"#元气满满 #提升活力 #释放情绪 #缓解压力"},"51":{"en":"Basil","lat":"Ocimum basilicum","fam":"唇形科罗勒属","part":"叶片","chem":"芳樟醇","scene":"#美味觉醒 #唇齿留香 #专心驾驶 #芬芳相随"},"58":{"en":"Adaptiv","lat":"","fam":"","part":"","chem":"薰衣草/平静安抚、木兰花/甜美放松、古巴香脂/舒缓呵护、迷迭香/活力充沛、绿薄荷/沁凉平静、橙花/高贵清纯、野橘/清新香气、枫香/宁静悠远","scene":"#保持注意力 #怡然芬芳 #香氛泡泡浴"},"5":{"en":"Lavender","lat":"Lavandula angustifolia","fam":"唇形科薰衣草属","part":"花朵","chem":"芳樟醇/乙酸芳樟酯","scene":"#营造良好的睡眠氛围 #温柔呵护 #释放压力"},"14":{"en":"Grapefruit","lat":"Citrus×paradisi","fam":"芸香科柑橘属","part":"果皮","chem":"D-柠檬烯","scene":"#柑橘香气 #增添饮品风味 #提振身心"},"25":{"en":"Turmeric","lat":"Curcuma longa","fam":"姜科姜黄属","part":"根茎","chem":"芳姜黄酮/姜黄酮","scene":"#增添风味 #挑逗味蕾 #点亮心情 #愉悦身心"},"32":{"en":"Thyme","lat":"Thymus vulgaris","fam":"唇形科百里香属","part":"叶片","chem":"百里香酚/对伞花烃","scene":"#清新空气 #自在呼吸 #清洁环境 #靓丽如新"},"41":{"en":"DDR Prime","lat":"","fam":"","part":"","chem":"乳香/元气满满 ·野橘/清新香气 ·山鸡椒/满满战斗力 ·百里香/活力四射 ·丁香花蕾/激励振奋 ·夏季香薄荷/清凉凉爽 ·绿花白千层/温和蜕变 ·柠檬草/放松舒缓","scene":"#提振元气 #赋活新生 #美好呼吸 #温柔相伴"},"50":{"en":"Peace","lat":"","fam":"","part":"","chem":"岩兰草/放松平和 ·薰衣草/温柔抚慰 ·依兰依兰/热情婉转 ·乳香/温柔包裹 ·快乐鼠尾草/舒缓焦虑 ·马郁兰/释放压力 ·岩蔷薇/重获宁静 ·绿薄荷/沁爽提神","scene":"#安然平和 #惬意时光 #安抚焦躁 #温馨陪伴"},"57":{"en":"Lemongrass","lat":"Cymbopogon flexuosus","fam":"禾本科香茅属","part":"叶片","chem":"柠檬醛/橙花醛","scene":"#清新空气 #淡香满屋 #泰式美食 #增添风味"},"64":{"en":"M-PWR","lat":"","fam":"","part":"","chem":"圆柚/轻盈律动 ·柠檬/提振精神 ·椒样薄荷/清新活力 ·生姜/温暖身心 ·斯里兰卡肉桂皮/激励热情","scene":"#打开味蕾 #能量嗅吸 #提振扩香 #元气满满"},"4":{"en":"Clary Sage","lat":"Salvia sclarea","fam":"唇形科鼠尾草属","part":"花朵","chem":"乙酸芳樟酯/芳樟醇","scene":"#提振情绪 #放松平衡 #亲密无间 #温馨浪漫"},"13":{"en":"Bergamot","lat":"Citrus bergamia","fam":"芸香科柑橘属","part":"果皮","chem":"柠檬烯/乙酸芳樟酯","scene":"#点亮心情 #自在随心 #创造温和的睡眠环境"},"22":{"en":"Ylang Ylang","lat":"Cananga odorata","fam":"番荔枝科依兰属","part":"花朵","chem":"大根香叶烯D/β-石竹烯","scene":"#定制浪漫随身香氛 #打造轻松沟通氛围"},"31":{"en":"Jasmine","lat":"Jasminum grandiflorum","fam":"木犀科素馨属","part":"花朵","chem":"乙酸苄酯/苯甲酸苄酯","scene":"#魅力香氛 #如影随形 #平和情绪 #愉悦身心"},"40":{"en":"Eucalyptus","lat":"Eucalyptus radiata","fam":"桃金娘科桉属","part":"叶片","chem":"1,8-桉油醇/α-松油醇","scene":"#净享自在呼吸 #放松疲劳身心"},"49":{"en":"Cheer","lat":"","fam":"","part":"","chem":"","scene":"#内心欢喜 #社交互动 #定制香氛 #朝气蓬勃"},"56":{"en":"TerraShield","lat":"","fam":"","part":"","chem":"","scene":"#清新洁净家居空间 #户外野营绝佳伴侣"},"63":{"en":"On Guard Food Essence","lat":"","fam":"","part":"","chem":"","scene":"#安心守护 #清新舒畅 #温暖身心 #活力充沛"},"3":{"en":"Cypress","lat":"Cupressus sempervirens","fam":"柏木亚科柏木属","part":"叶片","chem":"α-蒎烯/δ-3-蒈烯","scene":"#轻松奔跑 #轻盈舒畅 #清新空气 #走入森林氛围"},"10":{"en":"Roman Chamomile","lat":"Anthemis nobilis","fam":"菊科春黄菊属","part":"花朵","chem":"4-甲基当归酸戊酯/当归酸异丁酯/(E)-2-甲基巴豆酸异戊酯","scene":"#稳定情绪 #应对生活 #静谧甜美 #温柔呵护"},"21":{"en":"Cinnanon Bark","lat":"Cinnamomum zeylanicum","fam":"樟科樟属","part":"树皮","chem":"肉桂醛/丁香油酚","scene":"#美食调味料 #温暖呼吸 #放松身心"},"30":{"en":"Neroli","lat":"Citrus aurantium","fam":"芸香科柑橘属","part":"花朵","chem":"芳樟醇/乙酸芳樟酯/柠檬烯","scene":"#少女香气 #温柔浪漫 #居家香氛 #个人香水"},"39":{"en":"Juniper Berry","lat":"Juniperus communis","fam":"柏科刺柏属","part":"浆果","chem":"α-蒎烯/桧烯","scene":"#清新畅快森呼吸 #释放压力 #放松身心"},"48":{"en":"Coriander","lat":"Coriandrum sativum","fam":"伞形科芫荽属","part":"种子","chem":"芳樟醇/α-蒎烯/γ-松油烯/樟脑","scene":"#重燃对美食的热情 #温和提振 #舒缓压力"},"55":{"en":"Passion","lat":"","fam":"","part":"","chem":"豆蔻/甜美热情,茉莉提取物/甜美浪漫,肉桂/暖意融融,香草萃取物/提升情绪,生姜/温暖身心,达米阿那/平衡放松,丁香/鼓舞精神,分馏椰子油/温柔延展,檀香/稳定凝神","scene":"#甜美热情 #热忱能量 #提升情绪 #温暖身心"},"62":{"en":"Deep Blue","lat":"","fam":"","part":"","chem":"冬青/畅快放松,永久花/永不凋谢,樟树/浓郁芬芳,依兰依兰/轻轻抚慰,椒样薄荷/沁凉舒爽,桂花/馥郁芬芳,蓝艾菊/静谧幽蓝,西洋蓍草/呵护身心,德国洋甘菊/温和舒缓","scene":"#充满活力 #温和舒缓 #放松伸展 #舒展身心"},"9":{"en":"Lemon","lat":"Citrus limon","fam":"芸香科柑橘属","part":"果皮","chem":"柠檬烯/β-蒎烯/γ-松油烯","scene":"#洁净环境 #靓丽如新 #提振情绪 #愉悦心情"},"18":{"en":"Rosemary","lat":"Rosmarinus officinalis","fam":"唇形科迷迭香属","part":"花朵、叶片","chem":"1,8-桉油醇/α-蒎烯/樟脑","scene":"#全神贯注 #高效学习 #顺畅呼吸 #惬意凉爽"},"29":{"en":"Blue Tansy","lat":"Tanacetum annuum","fam":"菊科艾菊属","part":"花朵、叶片、茎","chem":"母菊天蓝烃/桧烯/樟脑","scene":"#平衡情绪 #镇定舒缓 #柔和香气 #好梦相随"},"38":{"en":"Ginger","lat":"Zingiber officinale","fam":"姜科姜属","part":"根茎","chem":"α-姜烯/β-倍半水芹烯","scene":"#增添饮食独特风味 #温暖身心 #焕发活力"},"47":{"en":"Salubelle","lat":"","fam":"","part":"","chem":"乳香/逆向生长 · 没药/平衡放松 · 檀香/沉稳木香 · 永久花/永不凋谢 · 薰衣草/温柔抚慰 · 玫瑰/绽放光彩","scene":"#柔美肌肤 #留住美丽 #焕发神采 #神清气爽"},"54":{"en":"SoftTalk","lat":"","fam":"","part":"","chem":"玫瑰/浪漫幸福 · 岩兰草/香气浓醇 · 夏威夷檀香/气定神闲 · 岩蔷薇/幽香绵长 · 广藿香/意味深长 · 依兰依兰/烂漫随性 · 佛手柑/香中有韵 · 可可豆提取物/淡淡芬芳 · 茉莉/令人迷醉 · 香草萃取物/丰润甜美 · 肉桂/暖意融融 · 分馏椰子油/温柔延展","scene":"#丰润甜美 #香气浓醇 #促进和谐社交互动"},"61":{"en":"Balance","lat":"","fam":"","part":"","chem":"黑云杉/稳定身心 · 桂花/浓郁甜美 · 芳樟/平静心灵 · 德国洋甘菊/温柔抚慰 · 乳香/平和温柔 · 分馏椰子油/温柔延展 · 蓝艾菊/静谧幽蓝","scene":"#内心平衡 #改善呼吸体验 #放松时刻 #美梦入眠"}}; // 64支全档案
+
+
+// 十二经络（子午流注时辰表）：下标 0=寅肺…10=子胆…11=丑肝（循行按 子→亥 正序排布）
+const MERIDIAN = [
+  {tz:'寅',t:'03-05',name:'肺经',  hex:11},
+  {tz:'卯',t:'05-07',name:'大肠经',hex:34},
+  {tz:'辰',t:'07-09',name:'胃经',  hex:43},
+  {tz:'巳',t:'09-11',name:'脾经',  hex:1},
+  {tz:'午',t:'11-13',name:'心经',  hex:44},
+  {tz:'未',t:'13-15',name:'小肠经',hex:33},
+  {tz:'申',t:'15-17',name:'膀胱经',hex:12},
+  {tz:'酉',t:'17-19',name:'肾经',  hex:20},
+  {tz:'戌',t:'19-21',name:'心包经',hex:23},
+  {tz:'亥',t:'21-23',name:'三焦经',hex:2},
+  {tz:'子',t:'23-01',name:'胆经',  hex:24},
+  {tz:'丑',t:'01-03',name:'肝经',  hex:19}
+];
+const MER_COLOR = MERIDIAN.map((_,i)=> new THREE.Color().setHSL(i/12, 0.72, 0.56));
+
+// ---------- 摆位 ----------
+const place = {};
+place[1] = {lat:90, lon:0, layer:'N极', center:false};
+place[2] = {lat:-90, lon:0, layer:'S极', center:false};
+const ring = {
+  V:  HEX.filter(h=>yang(h)===5).map(h=>h[0]),
+  IV: HEX.filter(h=>yang(h)===4 && !CENTER.IV.includes(h[0])).map(h=>h[0]),
+  III:HEX.filter(h=>yang(h)===3 && !CENTER.III.includes(h[0])).map(h=>h[0]),
+  II: HEX.filter(h=>yang(h)===2 && !CENTER.II.includes(h[0])).map(h=>h[0]),
+  I:  HEX.filter(h=>yang(h)===1).map(h=>h[0])
+};
+function buildSlots(L){
+  const lat = latOfLayer(L);
+  if(L==='V'||L==='I') return [0,60,120,180,240,300].map(lon=>({lat,lon}));
+  if(L==='IV'||L==='II') return Array.from({length:12},(_,i)=>({lat,lon:i*30}));
+  const s=[]; for(const b of [0,60,120,180,240,300]) for(const o of [-15,0,15]) s.push({lat,lon:b+o});
+  return s;
+}
+for(const L of ['V','IV','II','III','I']){
+  const slots = buildSlots(L); const taken = new Array(slots.length).fill(false); const msgSlots=[];
+  for(const n of ring[L]){
+    if(MESSAGE[n]!==undefined && MESSAGE[n]!==90 && MESSAGE[n]!==270){
+      const idx = slots.findIndex((s,i)=> !taken[i] && ((s.lon%360)+360)%360 === MESSAGE[n]);
+      taken[idx]=true; place[n]={lat:slots[idx].lat, lon:slots[idx].lon, layer:L, center:false}; msgSlots.push(n);
+    }
+  }
+  let si=0;
+  for(const n of ring[L]){
+    if(msgSlots.includes(n)) continue;
+    while(si<slots.length && taken[si]) si++;
+    taken[si]=true; place[n]={lat:slots[si].lat, lon:slots[si].lon, layer:L, center:false}; si++;
+  }
+}
+// 中心双卦（完成卦/纯卦）落在 15° 经线倍数上，确保整体全部在经纬交汇点
+const CENTER_LON = {III:[330,30], IV:[15,45,75], II:[15,45,75]};
+for(const L of ['II','IV','III']){
+  const lat = latOfLayer(L);
+  CENTER[L].forEach((n,i)=>{ place[n]={lat, lon:CENTER_LON[L][i], layer:L, center:true}; });
+}
+
+// ---------- 场景 ----------
+const R = 5;
+const app = document.getElementById('app');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1117);
+const globeGroup = new THREE.Group(); scene.add(globeGroup);   // 球体整体（随循行旋转 360°）
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 16);   // 平视正对球心：起点(0h/24h)精确落在屏幕正中（原(0,4,14)斜视偏高，起点偏下）
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+app.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.autoRotateSpeed = 1.2;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(8,10,8); scene.add(dl);
+
+// 半透明球（透出球心双卦）
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(R,48,32),
+  new THREE.MeshPhongMaterial({color:0x1f6feb, transparent:true, opacity:0.07, shininess:10, side:THREE.DoubleSide})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(R,24,16),
+  new THREE.MeshBasicMaterial({color:0x30475e, wireframe:true, transparent:true, opacity:0.16})));
+
+// 经纬网（分色、分两组）
+const paraGroup = new THREE.Group();   // 纬线：金色
+const meriGroup = new THREE.Group();    // 经线：青色
+const meriFineGroup = new THREE.Group(); // 经线辅助：每15°
+function loopLine(points, color, opacity){
+  const g = new THREE.BufferGeometry().setFromPoints(points);
+  return new THREE.LineLoop(g, new THREE.LineBasicMaterial({color, transparent:true, opacity}));
+}
+// 纬线：5条主圈（对应五层）
+function paraPts(lat){ const pts=[]; for(let a=0;a<=360;a+=4){ const la=lat*Math.PI/180, lo=a*Math.PI/180;
+  pts.push(new THREE.Vector3(R*Math.cos(la)*Math.cos(lo), R*Math.sin(la), R*Math.cos(la)*Math.sin(lo))); } return pts; }
+for(const lat of [60,30,0,-30,-60]) paraGroup.add(loopLine(paraPts(lat), 0xe3a008, 0.55));
+for(let m=0;m<12;m++){
+  const lo0=m*30*Math.PI/180; const pts=[];
+  for(let a=0;a<=360;a+=4){ const la=a*Math.PI/180;
+    pts.push(new THREE.Vector3(R*Math.cos(la)*Math.cos(lo0), R*Math.sin(la), R*Math.cos(la)*Math.sin(lo0))); }
+  meriGroup.add(loopLine(pts, 0x2dd4ff, 0.4));
+}
+globeGroup.add(paraGroup); globeGroup.add(meriGroup);
+// 经线辅助：每 15° 一条，共 24 条，画在最外层球面外一点避免与主线 z-fighting
+for(let m=0;m<24;m++){
+  const lo0=m*15*Math.PI/180; const pts=[]; const rr=R*1.004;
+  for(let a=0;a<=360;a+=4){ const la=a*Math.PI/180;
+    pts.push(new THREE.Vector3(rr*Math.cos(la)*Math.cos(lo0), rr*Math.sin(la), rr*Math.cos(la)*Math.sin(lo0))); }
+  meriFineGroup.add(loopLine(pts, 0x7fe3ff, 0.16));
+}
+globeGroup.add(meriFineGroup);
+
+// 阴阳两面
+const yyGroup = new THREE.Group(); yyGroup.visible=false;
+yyGroup.add(new THREE.Mesh(new THREE.SphereGeometry(R*1.002,48,32,0,Math.PI*2,0,Math.PI/2),
+  new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.10, side:THREE.DoubleSide})));
+yyGroup.add(new THREE.Mesh(new THREE.SphereGeometry(R*1.002,48,32,0,Math.PI*2,Math.PI/2,Math.PI/2),
+  new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.22, side:THREE.DoubleSide})));
+globeGroup.add(yyGroup);
+
+// ---------- 精油卡（替代卦图标签；占位→加载真实卡图） ----------
+const CARD_TEX={};
+function placeholderCard(n, name, color, w, h){
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d');
+  x.fillStyle='rgba(13,17,23,0.9)';
+  const r=Math.min(w,h)*0.10;
+  x.beginPath(); x.moveTo(r,0); x.arcTo(w,0,w,h,r); x.arcTo(w,h,0,h,r); x.arcTo(0,h,0,0,r); x.arcTo(0,0,w,0,r); x.closePath(); x.fill();
+  x.strokeStyle=color; x.lineWidth=Math.max(2,w*0.02); x.stroke();
+  x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
+  x.font=`bold ${Math.round(h*0.12)}px "PingFang SC","Microsoft YaHei",sans-serif`;
+  x.fillText(n+'', w/2, h*0.32);
+  x.font=`bold ${Math.round(h*0.15)}px "PingFang SC","Microsoft YaHei",sans-serif`;
+  x.fillStyle=color;
+  x.fillText(name, w/2, h*0.60);
+  x.fillStyle='#8b949e'; x.font=`bold ${Math.round(h*0.06)}px sans-serif`;
+  x.fillText('精油卡载入中…', w/2, h*0.82);
+  return c;
+}
+const imgLoader = new THREE.TextureLoader();
+window.__dbg.make=0;
+let loadedCount=0;
+function makeCard(n, name, color, isCenter){ window.__dbg.make++;
+  // 比例接近精油卡 1240x1754 → 高宽比 1.414；普通卦比球心卦大一号
+  const baseW = isCenter ? 0.62 : 0.92;
+  const baseH = baseW*1.414;
+  const pw = 128, ph = Math.round(pw*1.414);
+  const phTex = new THREE.CanvasTexture(placeholderCard(n,name,color,pw,ph));
+  phTex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.SpriteMaterial({map:phTex, transparent:true, depthTest:false, opacity:1});
+  const sp = new THREE.Sprite(mat);
+  sp.scale.set(baseW, baseH, 1);
+  sp.cardBase=[baseW, baseH];
+  if(!CARD_TEX[n]){
+    CARD_TEX[n]=imgLoader.load('cards/'+n+'.jpg', tex=>{
+      tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=4;
+      loadedCount++;
+      const m=mat;
+      if(m){ m.map=tex; m.needsUpdate=true; }
+      const el=document.getElementById('loading');
+      if(el) el.style.display = loadedCount<64 ? 'block' : 'none';
+      if(el && loadedCount<64) el.textContent='精油卡载入中 '+loadedCount+'/64';
+      if(loadedCount>=64 && el) el.style.display='none';
+    }, undefined, ()=>{
+      loadedCount++;
+      const el=document.getElementById('loading');
+      if(el && loadedCount<64){ el.style.display='block'; el.textContent='精油卡载入中 '+loadedCount+'/64'; }
+      if(el && loadedCount>=64) el.style.display='none';
+    });
+  } else {
+    // 重复引用同一纹理（同序号仅一次，不会走到）
+  }
+  return sp;
+}
+function toXYZ(lat,lon,rad){
+  const la=lat*Math.PI/180, lo=lon*Math.PI/180;
+  return new THREE.Vector3(rad*Math.cos(la)*Math.cos(lo), rad*Math.sin(la), rad*Math.cos(la)*Math.sin(lo));
+}
+
+// ---------- 分图层（I-V + 两极） ----------
+const layerGroups = {};
+for(const k of ['I','II','III','IV','V','pole']) { layerGroups[k]=new THREE.Group(); globeGroup.add(layerGroups[k]); }
+const dots = [];
+const cardRecs = [];
+function layerKeyOf(layer){ return (layer==='N极'||layer==='S极')?'pole':layer; }
+
+for(const h of HEX){ window.__dbg.loop++;
+  const n=h[0], info=place[n], key=layerKeyOf(info.layer);
+  const color = info.layer==='N极' ? '#ffd866' : info.layer==='S极' ? '#c9d1d9' : LAYER_COLOR[info.layer];
+  const pos = info.center ? new THREE.Vector3(0, R*Math.sin(info.lat*Math.PI/180), 0) : toXYZ(info.lat, info.lon, R);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.10,12,12), new THREE.MeshBasicMaterial({color}));
+  dot.position.copy(pos);
+  const ud = {n, name:h[1], upper:h[2], lower:h[3], y:yang(h), layer:info.layer, center:info.center};
+  dot.userData = ud; layerGroups[key].add(dot); dots.push(dot);
+  // 精油卡（竖卡，替代卦图标签；位置与卦图一致，中心卦略小）
+  let lpos;
+  if(info.center){ const ang=(HEX.indexOf(h)%3)*2.094; lpos=new THREE.Vector3(1.9*Math.cos(ang), pos.y, 1.9*Math.sin(ang)); }
+  else lpos = toXYZ(info.lat, info.lon, R*1.20);
+  const lab = makeCard(n, h[1], color, info.center); lab.position.copy(lpos);
+  lab.userData = ud; layerGroups[key].add(lab);
+  cardRecs.push({sp:lab, dot, n, baseW:lab.cardBase[0], baseH:lab.cardBase[1], removed:false, key});
+}
+const cardSprites = cardRecs.map(c=>c.sp);
+
+// ============ 十二经络循行（新版 · Z字折返 · 独立图层） ============
+// 按原文规则重建循行路径（起点 = 三层(赤道) hex55/hex56 之间的交汇点 lon 270 = 24h 点 = 0h）：
+//   横向(沿纬线)每折+15° = 虚线；纵向(沿经线上/下) = 实线；
+//   在 III(赤道) ↔ 60°N/60°S 之间来回折返（转折只在一/三/五层，途经 II/IV 层）；
+//   12 段对应十二经络；整条路径沿球面转满 360° 回到起点。
+// 需求K：经络循行图与球体分属两个图层 → 各自按自己方向/速度独立旋转。
+const flowGroup = new THREE.Group();   // 经络独立图层（不随球体旋转，另行驱动）
+const FLOW_R = R*1.02;                 // 紧贴球面（略外移避免与卦点重叠）
+const STEP = +15;                      // 经度递增 → 整条循行反向绕球（经络跟着走）
+const FLOW_PERIOD = 144;               // 一个完整循行(12时辰/360°)秒数（72→144 再放慢一倍，每经=12s；球体同步一整圈）
+let _lat = 0, _lon = 270;              // 起点：三层 · 55/56 之间
+const knots = [];                      // 折返节点（仅在一/三/五层）
+function _knot(){ knots.push({lat:_lat, lon:_lon}); }
+_knot();
+const segs = [];                       // {type:'solid'|'dashed', color, a, b}
+// 经络按「子午流注」时辰正序沿循行推进（绕球方向已与旧版相反，经络跟着走）：
+//   起点 0h=24h = 子时(23-01)胆经 → 每过 2h(=1/12圈)换一经：
+//   0h 子胆 → 2h 丑肝 → 4h 寅肺 → 6h 卯大肠 → 8h 辰胃 → 10h 巳脾 → 12h 午心 →
+//   14h 未小肠 → 16h 申膀胱 → 18h 酉肾 → 20h 戌心包 → 22h 亥三焦 → 24h 回到起点子胆。
+// 于是：6h(1/4圈)=大肠经、12h(半圈)=心经、18h(3/4圈)=肾经、0/24h(起点)=胆经。
+// 折向交替：偶数段先向上(60°N)、奇数段先向下(60°S)。
+const LABEL_ORDER = [10,11,0,1,2,3,4,5,6,7,8,9];   // 子丑寅卯辰巳午未申酉戌亥（=MERIDIAN 下标顺序）
+for(let k=0;k<12;k++){
+  const c = MER_COLOR[LABEL_ORDER[k]];
+  const up = (k%2===0);
+  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lat=up?60:-60; _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lat=0;        _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+}
+// 收尾：12 段(每段经度 +30°)后 lon=270+360=630(≡270)、lat=0 → 与起点重合，构成闭合环（24h 回到起点）
+// 把每段展开成贴球面的弧（密采样）：纵向弧经度不变、纬度插值（途经 II/IV 层）；横向弧纬度不变、经度插值
+function arcPoints(a, b, type){
+  const out=[];
+  if(type==='solid'){
+    const N=Math.max(2, Math.round(Math.abs(b.lat-a.lat)/3));
+    for(let i=0;i<=N;i++) out.push(toXYZ(a.lat+(b.lat-a.lat)*i/N, a.lon, FLOW_R));
+  } else {
+    const N=Math.max(2, Math.round(Math.abs(b.lon-a.lon)/3));
+    for(let i=0;i<=N;i++) out.push(toXYZ(a.lat, a.lon+(b.lon-a.lon)*i/N, FLOW_R));
+  }
+  return out;
+}
+// 密采样路径（贴球面）+ 每段类型/经络序号/累计弧长，供着色、流动闪动、图例联动
+const flowPts=[], flowCol=[], flowType=[], flowMer=[];
+for(const s of segs){ const ap=arcPoints(s.a, s.b, s.type); const from=flowPts.length?1:0;
+  const mer=MER_COLOR.indexOf(s.color);
+  if(flowPts.length){ // 转角处那一小段归"下一段"的类型，保证实线/虚线边界精确
+    const j=flowPts.length-1; flowType[j]=s.type; flowCol[j]=s.color; flowMer[j]=mer; }
+  for(let i=from;i<ap.length;i++){ flowPts.push(ap[i]); flowCol.push(s.color); flowType.push(s.type); flowMer.push(mer); } }
+const segLen=[], clen=[0]; let totalLen=0;
+for(let i=0;i<flowPts.length-1;i++){ const L=flowPts[i].distanceTo(flowPts[i+1]); segLen.push(L); totalLen+=L; clen.push(totalLen); }
+function flowLoc(t){ let d=t*totalLen;
+  for(let i=0;i<segLen.length;i++){ if(d<=segLen[i]){ const f=segLen[i]===0?0:d/segLen[i];
+    return {i, f}; } d-=segLen[i]; }
+  return {i:segLen.length-1, f:1}; }
+function meridianAt(t){ return flowMer[flowLoc(t).i]; }
+
+// 循行线：细管体（清晰可见）+ 沿线柔光亮窗（像太极线，无跳点、无拖尾）
+// 纵向段=实线；横向段=按沿线距离挖间隙 → 虚线
+const loopPts = flowPts.slice(0, flowPts.length-1);   // 末点与起点重合，去掉以免闭合曲线退化
+const flowCurve = new THREE.CatmullRomCurve3(loopPts, true, 'centripetal', 0.5);
+const TSEG = 1400, TRAD = 0.045, TRSEG = 8, RING = TRSEG+1;   // 管径 0.045：清晰可见
+const flowTubeGeo = new THREE.TubeGeometry(flowCurve, TSEG, TRAD, TRSEG, true);
+{ // 顶点属性：经络色 / 是否横向(虚线) / 沿线距离 / 沿线比例
+  const N = flowTubeGeo.attributes.position.count;
+  const aCol=new Float32Array(N*3), aDash=new Float32Array(N), aDist=new Float32Array(N), aT=new Float32Array(N);
+  for(let i=0;i<=TSEG;i++){
+    const u = i/TSEG;
+    const fi = Math.min(loopPts.length-1, Math.round(u*(loopPts.length-1)));
+    const c = flowCol[fi];
+    for(let j=0;j<RING;j++){ const v=i*RING+j;
+      aCol[v*3]=c.r; aCol[v*3+1]=c.g; aCol[v*3+2]=c.b;
+      aDash[v]=(flowType[fi]==='dashed')?1:0;
+      aDist[v]=clen[fi]; aT[v]=clen[fi]/totalLen; }
+  }
+  flowTubeGeo.setAttribute('aCol', new THREE.BufferAttribute(aCol,3));
+  flowTubeGeo.setAttribute('aDash', new THREE.BufferAttribute(aDash,1));
+  flowTubeGeo.setAttribute('aDist', new THREE.BufferAttribute(aDist,1));
+  flowTubeGeo.setAttribute('aT', new THREE.BufferAttribute(aT,1));
+}
+const flowUniforms = { uTime:{value:0}, uPeriod:{value:FLOW_PERIOD} };
+const FLOW_VERT = `
+  attribute vec3 aCol; attribute float aDash; attribute float aDist; attribute float aT;
+  varying vec3 vCol; varying float vDash; varying float vDist; varying float vT; varying vec3 vWorld;
+  void main(){ vCol=aCol; vDash=aDash; vDist=aDist; vT=aT;
+    vec4 wp = modelMatrix * vec4(position,1.0);
+    vWorld = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp; }`;
+// 正面亮、背面暗，但整条路径始终可见（depthTest:false → 转背面也不会被球挡住）
+// 亮度按"与头灯的有符号弧距"分层：头后(已走过)留彩色尾迹渐淡、前方只亮一小段预告、
+// 其余只是暗色的路线提示 → 七彩"走动的样子"清楚可读；头心另叠白炽，走到哪亮到哪。
+const FLOW_FRAG = `
+  uniform float uTime; uniform float uPeriod;
+  varying vec3 vCol; varying float vDash; varying float vDist; varying float vT; varying vec3 vWorld;
+  void main(){
+    if(vDash > 0.5 && fract(vDist/0.30) > 0.60) discard;   // 横向段挖间隙 → 虚线
+    float s  = fract(uTime/uPeriod);                       // 循行进度 0..1（一段=一经络）
+    float x  = fract(vT - s + 0.5) - 0.5;                  // 与头灯的带符号圆环弧距（1=整圈）
+    float bU = vT*12.0 - s*12.0;                           // 以"一经络=1"计；>0 = 在前方
+    float lit = (1.0 - smoothstep(0.0, 0.95, max(0.0,-bU)))   // 身后彩尾（收短≈1 经，紧贴灯头不漫到侧面）
+              * (1.0 - smoothstep(0.0, 0.30, max(0.0, bU)));  // 前方短预告（更贴灯头）
+    float core = 1.0 - smoothstep(0.004, 0.035, abs(x));   // 头心白炽
+    float side  = dot(normalize(vWorld), normalize(cameraPosition));
+    float front = smoothstep(-0.20, 0.25, side);           // >0 = 正面(朝我)
+    vec3 base = vCol*(0.24 + 1.15*lit) + core*vec3(1.0,0.97,0.90);  // 尾=经络本色，头=暖白
+    float alpha = mix(0.085, 0.95, lit);                   // 其余路线：暗线提示
+    alpha = alpha*mix(0.55, 1.0, front);                   // 背面再淡一档
+    alpha = max(alpha, core);                              // 头灯必然可见
+    alpha = min(alpha, 1.0);
+    gl_FragColor = vec4(base, alpha);
+  }`;
+const flowMat = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, depthTest:false, side:THREE.DoubleSide,
+  uniforms: flowUniforms, vertexShader:FLOW_VERT, fragmentShader:FLOW_FRAG });
+const flowLine = new THREE.Mesh(flowTubeGeo, flowMat);
+flowGroup.add(flowLine);
+
+// 循行"头灯"：白炽小珠 + 暖光晕，贴着路径前沿(弧距=s)走 → 走到哪、亮到哪，且始终正对观众
+const headDotMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, depthTest:false});
+const headDot = new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), headDotMat);
+const _hc=document.createElement('canvas'); _hc.width=_hc.height=128;
+const _hg=_hc.getContext('2d'); const _hgr=_hg.createRadialGradient(64,64,2,64,64,62);
+_hgr.addColorStop(0,'rgba(255,255,255,0.95)'); _hgr.addColorStop(0.35,'rgba(255,244,210,0.45)'); _hgr.addColorStop(1,'rgba(255,230,180,0)');
+_hg.fillStyle=_hgr; _hg.fillRect(0,0,128,128);
+const headHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(_hc), transparent:true,
+  depthTest:false, blending:THREE.AdditiveBlending, opacity:0.95}));
+headHalo.scale.set(1.15,1.15,1);
+const headGroup = new THREE.Group(); headGroup.add(headHalo); headGroup.add(headDot);
+flowGroup.add(headGroup);
+const _white=new THREE.Color(1,1,1), _mc=new THREE.Color();
+
+// 上下箭头（实线段中点，指向行进方向）—— 随循行线一并调细
+const arrowGeo = new THREE.ConeGeometry(0.075, 0.22, 10);
+for(const s of segs){ if(s.type!=='solid') continue;
+  const ap=arcPoints(s.a, s.b, 'solid'); const m0=Math.floor(ap.length/2);
+  const mid=ap[m0], nxt=ap[Math.min(ap.length-1, m0+1)];
+  const dir=nxt.clone().sub(mid).normalize();
+  const cone=new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({color:s.color.clone(), transparent:true, opacity:0.4, depthTest:false}));
+  cone.position.copy(mid); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+  flowGroup.add(cone);
+}
+
+// 起点标记（24h）
+const startPos = toXYZ(knots[0].lat, knots[0].lon, FLOW_R);
+const startMark = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,14), new THREE.MeshBasicMaterial({color:0xffffff}));
+startMark.position.copy(startPos); flowGroup.add(startMark);
+function makeTextSprite(text,color){
+  const c=document.createElement('canvas'); c.width=256; c.height=64; const g=c.getContext('2d');
+  g.fillStyle='rgba(13,17,23,0.85)'; g.fillRect(0,0,256,64);
+  g.strokeStyle=color; g.lineWidth=3; g.strokeRect(2,2,252,60);
+  g.fillStyle=color; g.font='bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,128,34);
+  const t=new THREE.CanvasTexture(c); const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));
+  sp.scale.set(1.6,0.4,1); return sp;
+}
+const startLabel = makeTextSprite('0h·24h 起点', '#ffffff');
+startLabel.position.copy(startPos.clone().multiplyScalar(1.12)); flowGroup.add(startLabel);
+window.__dbg.flow=true;
+scene.add(flowGroup);   // 经络循行 → 独立图层（不随球体转，需求K）
+
+// ---------- 太极线（太阳线：十二消息卦连线） ----------
+// 连接 SUN_ORDER 中 12 消息卦的实际球面位置（按 MESSAGE 经度 0°→330° 顺时针一圈），
+// 用闭合 CatmullRom 在球面上拉一条圆滑曲线（乾北极、坤南极穿入球体 → 似太极 S 形）。
+// 点击太极线本身即可隐藏/显示（需求J：点击可消失）。
+const sunGroup = new THREE.Group(); globeGroup.add(sunGroup);   // 随球体(顺转)层一起转
+(function(){
+  const pts = SUN_ORDER.map(n=>{
+    const p = place[n];
+    return toXYZ(p.lat===90 ? 89.999 : p.lat=== -90 ? -89.999 : p.lat, p.lon, R*1.015);
+  });
+  const curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal', 0.5);
+  const geo = new THREE.TubeGeometry(curve, 900, 0.020, 6, true);
+  const mat = new THREE.MeshBasicMaterial({ color:0xffa24d, transparent:true, opacity:0.92, depthWrite:false });
+  const line = new THREE.Mesh(geo, mat); line.userData={kind:'sun'};
+  sunGroup.add(line); sunGroup.userData.line=line;
+})();
+const sunLine = sunGroup.children[0];
+function setSunVisible(v){ sunGroup.visible=v; const cb=document.getElementById('t-sun'); if(cb) cb.checked=v; }
+
+// ---------- 图层按钮面板 ----------
+const layerRowsEl = document.getElementById('layerRows');
+const layerRowMap = {};
+for(const k of ['I','II','III','IV','V','pole']){
+  const row=document.createElement('div'); row.className='lrow';
+  row.innerHTML = `<span class="dot" style="background:${LAYER_META[k].c}"></span><span class="txt">${LAYER_META[k].t}</span>`;
+  row.addEventListener('click', ()=> setLayerVisible(k, !layerGroups[k].visible));
+  layerRowsEl.appendChild(row); layerRowMap[k]=row;
+}
+function setLayerVisible(k, vis){
+  layerGroups[k].visible = vis;
+  layerRowMap[k].classList.toggle('off', !vis);
+}
+
+// ---------- A4 时辰→经络→卦→精油 四联动 · B3 卦油档案浮层 ----------
+const HEXNAME={}; HEX.forEach(h=>{ HEXNAME[h[0]]=h[1]; });
+const cardInfoEl = document.getElementById('cardInfo');
+let activeMer=-1, merCard=null, selCard=null;
+function setScale(c,f){ if(c&&c.sp&&!c.removed&&c.sp.visible){ c.sp.scale.set(c.baseW*f, c.baseH*f, 1); } }
+function merCardOf(m){ const hex=MERIDIAN[m].hex; return cardRecs.find(x=>x.n===hex&&!x.removed)||null; }
+function clearMerHl(){ if(merCard){ setScale(merCard,1); merCard=null; } }
+function showMerBar(m){
+  const M=MERIDIAN[m], n=M.hex, o=OIL[n]||{};
+  infoBox.style.display='block';
+  infoBox.innerHTML=`<div style="font-size:13px"><b style="color:#ffd866">${M.tz}时 ${M.t}</b> · ${M.name}　｜　消息卦 <b>${n}·${HEXNAME[n]}</b>（${o.gua||''}）　→　精油：<b>${o.oil||'—'}</b></div>
+  <div style="color:#6e7681;font-size:11px;margin-top:2px">循行联动：此卡已放大，单击可看档案</div>`;
+}
+function applyMer(m){
+  clearMerHl();
+  activeMer=m;
+  if(m>=0 && m<12){ merCard=merCardOf(m); if(merCard) setScale(merCard,1.32); showMerBar(m); }
+  else if(infoBox) infoBox.style.display='none';
+}
+function _esc(s){ return String(s==null||s===''?'—':s); }
+function openCardInfo(c){
+  if(!c||c.removed) return;
+  if(selCard && selCard!==c) setScale(selCard,1);
+  selCard=c; setScale(c,1.18);
+  if(merCard && merCard!==c) setScale(merCard,1);   // 让出经络高亮，避免叠放大
+  const n=c.n, o=OIL[n]||{}, full=OILPROF[n];
+  const idx=HEX.findIndex(h=>h[0]===n), gua=HEX[idx]||[];
+  const meta=place[n]||{};
+  const mer=MERIDIAN.find(x=>x.hex===n);
+  const row=(k,v)=>`<tr><td class="k">${k}</td><td>${v}</td></tr>`;
+  let fields;
+  if(full){ fields=row('拉丁学名','<i>'+_esc(full.lat)+'</i>')+row('植物科属',_esc(full.fam))
+    +row('萃取部位',_esc(full.part))+row('主要成分',_esc(full.chem))
+    +row('适用场景','<span class="ci-scene">'+_esc(full.scene)+'</span>');
+  } else { fields=row('档案','<span style="color:#6e7681">该支档案暂缺</span>'); }
+  const yangCount=gua[2]?TRIGRAM_YANG[gua[2]]+TRIGRAM_YANG[gua[3]]:'';
+  cardInfoEl.innerHTML=`
+    <button class="ci-x" title="关闭">✕</button>
+    <div class="ci-top">
+      <img class="ci-img" src="cards/${n}.jpg" alt=""/>
+      <div style="flex:1">
+        <div class="ci-gua">第${n}卦 · ${HEXNAME[n]}（${o.gua||''}）　<span style="color:#8b949e;font-weight:400;font-size:12px">阳${yangCount} · ${meta.layer||''}</span></div>
+        <div class="ci-mer">${mer?mer.tz+'时 '+mer.t+' · '+mer.name+'（消息卦·随循行放大）':'非十二消息卦'}</div>
+        <div class="ci-oil">${_esc(o.oil)}${full&&full.en?' <small>'+_esc(full.en)+'</small>':''}</div>
+      </div>
+    </div>
+    <table>${fields}</table>
+    <button class="ci-btn" id="ciTake">✨ 收走此卡（放大4倍后消失）</button>
+    <div class="ci-note">档案取材多特瑞官方素材 · 供学习展示参考</div>`;
+  cardInfoEl.style.display='block';
+  cardInfoEl.querySelector('.ci-x').onclick=()=>closeCardInfo();
+  document.getElementById('ciTake').onclick=()=>{ closeCardInfo(); fadeOutCard(c,false); };
+  if(window.__dbg) window.__dbg.info={n};
+}
+function closeCardInfo(){
+  cardInfoEl.style.display='none'; cardInfoEl.innerHTML='';
+  if(selCard){ setScale(selCard,1); selCard=null; }
+  if(activeMer>=0) applyMer(activeMer);   // 关档案后恢复时辰高亮与信息条
+}
+window.__dbg.openInfo=openCardInfo; window.__dbg.closeInfo=closeCardInfo; window.__dbg.applyMer=applyMer;
+
+// ---------- 交互：单击精油卡=看档案（档案内可收走） / 双击=直接消失 / 点太极线=隐藏 ----------
+const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+let downXY=null; let lastClick=null; const clickTimers={};
+
+function fadeOutCard(c, direct){
+  if(c.removed) return;
+  c.removed = true;
+  if(clickTimers[c.n]){ clearTimeout(clickTimers[c.n]); delete clickTimers[c.n]; }
+  if(c.fx){ cancelAnimationFrame(c.fx); c.fx=0; }
+  const sp=c.sp, base=[c.baseW,c.baseH];
+  if(window.__dbg) window.__dbg.lastFade={n:c.n, direct:!!direct};
+  if(direct){
+    sp.visible=false; if(c.dot) c.dot.visible=false;
+    if(window.__dbg) window.__dbg.lastFade.end=0;
+    return;
+  }
+  const D=(window.__dbg&&window.__dbg.D)||800;   // 调试可调慢以便抓帧，默认 800ms
+  const t0=performance.now();
+  if(window.__dbg) window.__dbg._fadeLog=[];
+  function step(){
+    const k=Math.min(1,(performance.now()-t0)/D);
+    const park=(window.__dbg&&window.__dbg.park)||0;   // 调试：停在中间某帧便于截图
+    const kk=(park&&k>park)?park:k;
+    const e=1-Math.pow(1-kk,3);
+    const f=1+3*e;                       // 缩放 1 → 4 倍
+    sp.scale.set(base[0]*f, base[1]*f, 1);
+    sp.material.opacity=1-e;
+    const L=window.__dbg&&window.__dbg._fadeLog;
+    if(L&&L.length<400) L.push([+(kk.toFixed(3)), +f.toFixed(3), +((1-e).toFixed(3))]);
+    if(k<1 && !(park&&k>=park)){ c.fx=requestAnimationFrame(step); }
+    else if(park&&k>=park){
+      c.fx=0;
+      if(window.__dbg){ window.__dbg.holding={n:c.n,k:+park.toFixed(3),f:+f.toFixed(3)}; window.__dbg._hold={c,step}; }
+    }
+    else {
+      sp.visible=false; if(c.dot) c.dot.visible=false; c.fx=0;
+      if(window.__dbg) window.__dbg.lastFade.end=Math.round(performance.now()-t0);
+    }
+  }
+  window.__dbg.finishHold=function(){
+    if(!window.__dbg) return;
+    window.__dbg.park=0;
+    const h=window.__dbg._hold; window.__dbg._hold=null;
+    if(h&&h.step) h.step();
+  };
+  step();
+}
+function resetAllCards(){
+  for(const c of cardRecs){
+    if(c.fx){ cancelAnimationFrame(c.fx); c.fx=0; }
+    if(clickTimers[c.n]){ clearTimeout(clickTimers[c.n]); delete clickTimers[c.n]; }
+    c.removed=false; c.sp.visible=true; c.sp.scale.set(c.baseW,c.baseH,1); c.sp.material.opacity=1;
+    if(c.dot) c.dot.visible=true;
+  }
+  if(window.__dbg){ window.__dbg._fadeLog=[]; window.__dbg.lastFade=null; }
+  lastClick=null;
+  if(cardInfoEl) cardInfoEl.style.display='none';
+  if(selCard){ selCard=null; }
+  if(activeMer>=0) applyMer(activeMer);   // 复原后重新挂上当前时辰高亮与信息条
+}
+renderer.domElement.addEventListener('pointerdown', e=>{ downXY=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e=>{
+  if(!downXY) return;
+  const moved = Math.hypot(e.clientX-downXY[0], e.clientY-downXY[1]); downXY=null; if(moved>5) return;
+  window.__dbg.pu=(window.__dbg.pu||0)+1;
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse, camera);
+  const sprites = cardRecs.map(c=>c.sp).filter(s=>s.visible);
+  const hit = ray.intersectObjects(sprites, false)[0]
+      || ray.intersectObjects(dots.filter(d=>d.visible), false)[0]
+      || ray.intersectObjects(sunGroup.visible ? [sunLine] : [], false)[0];
+  window.__dbg.pick={n:(hit&&hit.object.userData&&hit.object.userData.n!=null)?hit.object.userData.n:null,
+    type:hit?hit.object.type:'none', x:Math.round(e.clientX), y:Math.round(e.clientY), t:performance.now()};
+  if(!hit){
+    if(cardInfoEl && cardInfoEl.style.display==='block') closeCardInfo();   // 点空白 → 关档案
+    return;
+  }
+  const ud=hit.object.userData||{};
+  if(ud.kind==='sun'){ setSunVisible(false); return; }   // 点太极线 → 消失
+  const n=ud.n; if(n==null) return;
+  const c=cardRecs.find(x=>x.n===n); if(!c || c.removed) return;
+  const now=performance.now();
+  if(lastClick && lastClick.n===n && now-lastClick.t<300){
+    // 双击 → 直接消失（关掉可能开着的档案）
+    if(clickTimers[n]){ clearTimeout(clickTimers[n]); delete clickTimers[n]; }
+    lastClick=null; if(selCard) closeCardInfo(); fadeOutCard(c, true); return;
+  }
+  if(lastClick && lastClick.n!==n && clickTimers[lastClick.n]){
+    clearTimeout(clickTimers[lastClick.n]); delete clickTimers[lastClick.n]; // 切到另一张卡：取消上一张待发动作
+  }
+  lastClick={n, t:now};
+  clickTimers[n]=setTimeout(()=>{ delete clickTimers[n]; if(!c.removed) openCardInfo(c); }, 300);  // 单击 → 看档案
+});
+// ---------- 调试帮手（浏览器验证用，对用户无影响） ----------
+window.__dbg.screenOf=function(n){
+  const c=cardRecs.find(x=>x.n===n); if(!c) return null;
+  const v=new THREE.Vector3(); c.sp.getWorldPosition(v); v.project(camera);
+  return {n, x:Math.round((v.x*0.5+0.5)*innerWidth), y:Math.round((-v.y*0.5+0.5)*innerHeight),
+    z:+v.z.toFixed(3), visible:c.sp.visible, removed:c.removed};
+};
+window.__dbg.front=function(k){
+  return cardRecs.filter(c=>c.sp.visible&&!c.removed).map(c=>{
+    const v=new THREE.Vector3(); c.sp.getWorldPosition(v); v.project(camera);
+    return {n:c.n, x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight, z:+v.z.toFixed(3)};
+  }).sort((a,b)=>b.z-a.z).slice(0,k||8);
+};
+window.__dbg.state=function(){
+  return {visible:cardRecs.filter(c=>c.sp.visible&&!c.removed).length,
+    removed:cardRecs.filter(c=>c.removed).map(c=>c.n),
+    flowPaused, pu:window.__dbg.pu||0};
+};
+const infoBox = document.getElementById('info');
+document.getElementById('btnReset').addEventListener('click', resetAllCards);
+
+// ---------- 开关 ----------
+document.getElementById('t-rotate').addEventListener('change', e=> controls.autoRotate = e.target.checked);
+document.getElementById('t-para').addEventListener('change', e=> paraGroup.visible = e.target.checked);
+document.getElementById('t-meri').addEventListener('change', e=> meriGroup.visible = e.target.checked);
+document.getElementById('t-meri-fine').addEventListener('change', e=> meriFineGroup.visible = e.target.checked);
+document.getElementById('t-meri-path').addEventListener('change', e=> flowGroup.visible = e.target.checked);
+document.getElementById('t-yinyang').addEventListener('change', e=> yyGroup.visible = e.target.checked);
+document.getElementById('t-sun').addEventListener('change', e=> sunGroup.visible = e.target.checked);
+let curPeriod = FLOW_PERIOD;   // 共用周期：循行走满一圈的秒数 = 球体转动 360° 的秒数（1:1 同步；默认 144s，每经 144/12=12s 平均）
+document.getElementById('t-ball').addEventListener('change', e=>{ curPeriod = parseFloat(e.target.value) || FLOW_PERIOD; flowUniforms.uPeriod.value = curPeriod; });
+
+// ---------- 卦图示例（图例） ----------
+(function(){
+  const lc = document.createElement('canvas'); lc.width=46; lc.height=66;
+  const g = lc.getContext('2d');
+  g.fillStyle='rgba(13,17,23,0.92)'; g.fillRect(0,0,46,66);
+  g.strokeStyle='#ffd866'; g.lineWidth=2; g.strokeRect(1,1,44,64);
+  const lines=[...TRIGRAM_LINES['乾'], ...TRIGRAM_LINES['坤']]; // 泰：乾下坤上，阴阳皆示
+  const cx=23, barW=26, lh=9, yTop=9;
+  for(let i=0;i<6;i++){
+    const y=yTop+(5-i)*lh;
+    if(lines[i]===1){ g.fillStyle='#ffd866'; g.fillRect(cx-barW/2, y-3, barW, 6); }
+    else { g.fillStyle='#9da7b3'; const seg=(barW-6)/2; g.fillRect(cx-barW/2, y-3, seg, 6); g.fillRect(cx+barW/2-seg, y-3, seg, 6); }
+  }
+  const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
+  const t=document.createElement('span'); t.style.cssText='color:#8b949e;font-size:12px;margin-right:8px'; t.textContent='卦图示例';
+  row.appendChild(t); row.appendChild(lc);
+  document.getElementById('legend').appendChild(row);
+})();
+
+// 十二经络图例（时辰 + 经络 + 色）；merChips 供循行联动高亮
+const merChips = [];
+(function(){
+  const box=document.getElementById('merLegend');
+  MERIDIAN.forEach((m,i)=>{
+    const c='#'+MER_COLOR[i].getHexString();
+    const chip=document.createElement('div'); chip.className='chip';
+    chip.innerHTML=`<span class="sw" style="background:${c}"></span><b>${m.tz}</b><span>${m.t} ${m.name}</span>`;
+    box.appendChild(chip); merChips.push(chip);
+  });
+})();
+
+// ---------- 渲染 ----------
+addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+const _q=new URLSearchParams(location.search);                       // 调试/分享：?t=秒数&p=1 → 打开即停在指定时辰
+let flowTime=(parseFloat(_q.get('t'))||0), flowPaused=!!(_q.get('p')==='1'||_q.get('pause')==='1'); const clock=new THREE.Clock();
+let lastMer = -1;
+function syncMerLegend(u){
+  const m = meridianAt(u);
+  if(m === lastMer) return;
+  if(merChips[lastMer]) merChips[lastMer].classList.remove('on');
+  if(merChips[m]) merChips[m].classList.add('on');
+  lastMer = m;
+  applyMer(m);   // A4：同步放大当前时辰的消息卦精油卡 + 更新信息条
+}
+function animate(){ window.__dbg.anim=true; requestAnimationFrame(animate); controls.update(); const dt=clock.getDelta();
+  if(started && !flowPaused) flowTime += dt;               // 未点击前静止：白点停在起点(0h)对齐正对您；点击任意处/键后才开始
+  const tt = (flowTime % curPeriod) / curPeriod;           // 0..1 = 白点沿路径走完一整圈
+  flowUniforms.uTime.value = flowTime;                     // 循行进度推进（亮窗沿路径前行，无跳点无拖尾）
+  flowUniforms.uPeriod.value = curPeriod;                  // 周期随下拉框同步（默认144s）
+  { const loc=flowLoc(tt); const A=flowPts[loc.i], B=flowPts[loc.i+1];   // 白点贴在前沿
+    if(A&&B) headGroup.position.copy(A).lerp(B, loc.f);
+    _mc.copy(MER_COLOR[flowMer[loc.i]]).lerp(_white,0.35); headDotMat.color.copy(_mc); }
+  syncMerLegend(tt);                                       // 下方十二经络图例跟着联动高亮
+  // ---- 定稿模型（按用户大白话）：白点长在球上、沿路径跑；跑到球面哪里，球就把那一面转到正对我 ----
+  // 循行线路(含白点/起点标记/箭头)与球体是"同一个整体"，每帧用同一转角 yaw，永不互相错位：
+  //   白点在整体坐标里的方位角 α = atan2(x,z)（沿路径从起点绕一整圈回到起点）；
+  //   想让白点所在的那一面正对相机，只需整体转到 yaw = 相机方位 − α。
+  //   → 球体没有任何独立转速/方向，只是"追着白点把它转到正对我"；
+  //     白点沿路径绕满 360° ⇔ 整体恰好追着转满 360°，循行结束时两者同时回到起点对齐。
+  const camA = Math.atan2(camera.position.x, camera.position.z);            // 相机当前正对的方位
+  const yaw = camA - Math.atan2(headGroup.position.x, headGroup.position.z); // 让白点所在面正对相机所需转角
+  globeGroup.rotation.y = yaw;   // 球体
+  flowGroup.rotation.y  = yaw;   // 循行线路 —— 与球刚性同转
+  renderer.render(scene,camera); }
+// 点击屏幕任意处 / 按任意键 → 才开始转动与循行（此刻起点已正对前方）
+let started = false;
+const startGate = document.getElementById('startGate');
+function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; }
+startGate.addEventListener('pointerdown', beginFlow);
+addEventListener('keydown', e=>{ if(!started){ beginFlow(); e.stopImmediatePropagation(); } });  // 首个键只负责"开始"，不触发暂停
+animate();
+addEventListener('keydown', e=>{ if(!started) return; if(e.code==='Space'){ e.preventDefault(); flowPaused=!flowPaused; document.getElementById('pauseBadge').style.display = flowPaused?'block':'none'; } });
+</script>
+</body>
+</html>

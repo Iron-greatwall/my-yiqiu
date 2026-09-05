@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="41ojZsP56ETJ4ar0tv6HV1">
+<head data-page-node-id="X4GmZonpMFPeswbsaWlnRy">
+<meta charset="UTF-8" data-page-node-id="3MYRbMMwcXSMdCamKPZQCL" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="HWLO22bKsHAentHG3nORCq" />
+<title>易球 · 易经三维宇宙映像（可旋转）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0d1117; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; color:#e6edf3; }
+  #app { position:fixed; inset:0; }
+  .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
+  #ui { top:12px; left:12px; max-width:262px; }
+  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; }
+  #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
+  #ui label { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+  #ui input { accent-color:#ffd866; }
+  #legend { margin-top:10px; border-top:1px solid #30363d; padding-top:8px; }
+  #legend .row { display:flex; align-items:center; gap:6px; }
+  #legend .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+  #legend .ln { width:18px; height:0; border-top:3px solid; display:inline-block; }
+  #layers { top:12px; right:12px; min-width:200px; }
+  #layers h2 { font-size:14px; margin-bottom:8px; color:#ffd866; }
+  .lrow { display:flex; align-items:center; gap:8px; padding:5px 7px; border-radius:7px; cursor:pointer; user-select:none; }
+  .lrow:hover { background:rgba(255,255,255,.06); }
+  .lrow .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+  .lrow .txt { flex:1; }
+  .lrow.off { opacity:.42; }
+  .lrow.off .txt { text-decoration:line-through; }
+  #info { bottom:12px; left:12px; min-width:220px; display:none; }
+  #info b { color:#ffd866; }
+  #info .big { font-size:18px; }
+  #credits { position:fixed; bottom:12px; right:12px; z-index:10; color:#6e7681; font-size:11px; }
+  #merLegend { bottom:12px; left:50%; transform:translateX(-50%); max-width:94vw; display:flex; flex-wrap:wrap; gap:5px 8px; justify-content:center; padding:8px 10px; }
+  #merLegend .chip { display:flex; align-items:center; gap:5px; font-size:11px; white-space:nowrap; padding:2px 7px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
+  #merLegend .chip .sw { width:10px; height:10px; border-radius:2px; flex:0 0 auto; }
+  #merLegend .chip b { color:#e6edf3; font-weight:600; }
+  #merLegend .chip span { color:#8b949e; }
+  #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
+  #merLegend .chip.on b { color:#ffd866; }
+  #merLegend .chip.on span { color:#e6edf3; }
+  #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
+  #startGate { position:fixed; inset:0; z-index:30; display:flex; align-items:center; justify-content:center; background:rgba(13,17,23,.42); cursor:pointer; user-select:none; }
+  #startGate .box { background:rgba(22,27,34,.92); border:1px solid #ffd866; border-radius:14px; padding:26px 42px; text-align:center; backdrop-filter:blur(4px); box-shadow:0 8px 40px rgba(0,0,0,.5); }
+  #startGate .t1 { font-size:20px; color:#ffd866; margin-bottom:10px; }
+  #startGate .t2 { font-size:13px; color:#9aa4b2; line-height:1.9; }
+  #startGate .t2 b { color:#ffd866; font-weight:600; }
+</style>
+</head>
+<body data-page-node-id="2liERPfGg89fbDoJNvL2nu">
+<div id="app" data-page-node-id="WDeQs3YmqvsM8sB9WIsvS7"></div>
+
+<div id="ui" class="panel" data-page-node-id="zEmjaXqrCVGV3fD1lYJc77">
+  <h1 data-page-node-id="MQYVfttmTAZckBaj4zWVT4">易球 · 三维宇宙映像</h1>
+  <div class="hint" data-page-node-id="I0qGM998pRRzxwIbuXEZKB">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
+  <label data-page-node-id="MKxW6HtAWwJHaqFTufwnvA"><input type="checkbox" id="t-rotate" data-page-node-id="No7MqsvrXC7fAPPCHdR50T" /> 自动旋转</label>
+  <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>
+  <label data-page-node-id="MyhDrsm2QfjrYgiKjBWTGa"><input type="checkbox" id="t-para" checked data-page-node-id="W0qSqDk4yBOGk0kgbqc3VL" /> 纬线（金色 · 5圈）</label>
+  <label data-page-node-id="MkDSwxEdiP4vz6lkI2WJD6"><input type="checkbox" id="t-meri" checked data-page-node-id="g0XjrDMZIoI4qEXdEJtemF" /> 经线（青色 · 12条）</label>
+  <label data-page-node-id="SzbDpPk3Yu9hSzFO01crJz"><input type="checkbox" id="t-meri-fine" checked data-page-node-id="f2GduHovHxi8pfaXeDjYJu" /> 经线辅助（青淡 · 每15°·24条）</label>
+  <label data-page-node-id="8C8D1T0yoslLq21YPqWb4w"><input type="checkbox" id="t-meri-path" checked data-page-node-id="zJIh7Et4WCSolKgSoUiIV6" /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
+  <label data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l2"><input type="checkbox" id="t-sun" checked data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l3" /> 太极线（十二消息卦 · 点击可消失）</label>
+  <label data-page-node-id="ueUmZdopWwMmwCbkyEI3vX"><input type="checkbox" id="t-yinyang" data-page-node-id="5eQQ2GEfgskltHE8ZYQdBD" /> 阴阳两面（半球着色）</label>
+  <div id="legend" data-page-node-id="ZeiqRlLCXWi3WFnuIC4iB7">
+    <div class="row" data-page-node-id="W4UROllz0tqKymnxScPxLF"><span class="dot" style="background:#4a90d9" data-page-node-id="rbK5lPfbEfZO1CkoURNOOH"></span> I层 · 1阳爻（60°S）</div>
+    <div class="row" data-page-node-id="teIMI4iJKYOib0SwHTpASu"><span class="dot" style="background:#5cb85c" data-page-node-id="G9khZmvXjHEHC2YHxp25Zo"></span> II层 · 2阳爻（30°S）</div>
+    <div class="row" data-page-node-id="jYCOIMj6Ww4FFx98CSDAu9"><span class="dot" style="background:#f0ad4e" data-page-node-id="ruyOBvl8omHJ8TnqvfPF4S"></span> III层 · 3阳爻（赤道）</div>
+    <div class="row" data-page-node-id="V5IPq06Ns9gymeie4Ojllb"><span class="dot" style="background:#e8643c" data-page-node-id="K93Hhdu7QEfZvHBGIWUbvR"></span> IV层 · 4阳爻（30°N）</div>
+    <div class="row" data-page-node-id="HX9eqkLRELYFtXrwbegx6i"><span class="dot" style="background:#9b59b6" data-page-node-id="rn2R5YotaApAjUNbSi7Az6"></span> V层 · 5阳爻（60°N）</div>
+    <div class="row" data-page-node-id="YFaP8oVFNBonL3dGJE9I1y"><span class="dot" style="background:#ffd866" data-page-node-id="t7bOcz3YlOhKsZD4Lh6ORH"></span> 乾北极 / 坤南极 ｜ 实心线=上下(经线) · 虚线=横向(纬线)</div>
+    <div class="row" data-page-node-id="6bX7UpgAZPn3gziaLkFAqF"><span class="ln" style="border-color:#e3a008" data-page-node-id="gR5ZHDII4PB4hkbusAf1ou"></span> 纬线（平行圈）</div>
+    <div class="row" data-page-node-id="HtlMcDoCJ2nurlziVT4sPB"><span class="ln" style="border-color:#2dd4ff" data-page-node-id="frqlpPDbu2DVCCAQuvA2XL"></span> 经线（过两极）</div>
+    <div class="row" data-page-node-id="YQzBdNMjnoYjA68lYjwlxM"><span class="ln" style="border-color:#7fe3ff" data-page-node-id="PuqnMkVGtFiVJ7KN0XHojm"></span> 经线辅助（每15°）</div>
+    <div class="row" data-page-node-id="q1w2e3r4t5y6u7i8o9p0a1s2"><span class="ln" style="border-color:#ffa24d" data-page-node-id="q1w2e3r4t5y6u7i8o9p0a1s3"></span> 太极线（太阳线 · 点线可隐藏）</div>
+  </div>
+</div>
+
+<div id="layers" class="panel" data-page-node-id="QDTP3AkhAYgq3qWCZGz9SD">
+  <h2 data-page-node-id="sWMstl1rycAwC4HE4D09o9">图层（点此隐藏 / 显示）</h2>
+  <div id="layerRows" data-page-node-id="fkhTwFKQ6CgsxigSsjI97K"></div>
+</div>
+
+<div id="info" class="panel" data-page-node-id="C4VJM8rMJuZdad31lnqlj0"></div>
+<div id="merLegend" class="panel" data-page-node-id="MStTEkv30uJl2KQ3qwGF0D"></div>
+<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点长在球面上，正停在 <b>0h·24h 起点（子时胆经）</b>、正对您<br>点击后：白点沿贴在球上的循行路径出发，跑满一整圈<br>球体没有自己的转速/方向 —— 只负责"白点跑到哪一面，就把那一面转到正对我"<br>白点跑完一圈 ⇔ 球体正好追着转满 360°，二者同时回到起点（默认 144s/圈，每经 12s）<br>再按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
+<div id="pauseBadge" class="panel" data-page-node-id="MtuxJ58u9YBBZBtPyOLOBD">⏸ 已暂停（空格继续）</div>
+<div id="credits" data-page-node-id="1CCagIRxLF1lmqmfLOvBXA">来源：J. Drasny《易球》 · 三维摆位按书重构</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+// ---------- 数据 ----------
+const TRIGRAM_YANG = {乾:3,兑:2,离:2,震:1,巽:2,坎:1,艮:1,坤:0};
+const TRIGRAM_LINES = {乾:[1,1,1],兑:[0,1,1],离:[1,0,1],震:[1,0,0],巽:[1,1,0],坎:[0,1,0],艮:[0,0,1],坤:[0,0,0]};
+const HEX = [
+ [1,'乾','乾','乾'],[2,'坤','坤','坤'],[3,'屯','坎','震'],[4,'蒙','艮','坎'],
+ [5,'需','坎','乾'],[6,'讼','乾','坎'],[7,'师','坤','坎'],[8,'比','坎','坤'],
+ [9,'小畜','巽','乾'],[10,'履','乾','兑'],[11,'泰','坤','乾'],[12,'否','乾','坤'],
+ [13,'同人','乾','离'],[14,'大有','离','乾'],[15,'谦','坤','艮'],[16,'豫','震','坤'],
+ [17,'随','兑','震'],[18,'蛊','艮','巽'],[19,'临','坤','兑'],[20,'观','巽','坤'],
+ [21,'噬嗑','离','震'],[22,'贲','艮','离'],[23,'剥','艮','坤'],[24,'复','坤','震'],
+ [25,'无妄','乾','震'],[26,'大畜','艮','乾'],[27,'颐','艮','震'],[28,'大过','兑','巽'],
+ [29,'坎','坎','坎'],[30,'离','离','离'],[31,'咸','兑','艮'],[32,'恒','震','巽'],
+ [33,'遁','乾','艮'],[34,'大壮','震','乾'],[35,'晋','离','坤'],[36,'明夷','坤','离'],
+ [37,'家人','巽','离'],[38,'睽','离','兑'],[39,'蹇','坎','艮'],[40,'解','震','坎'],
+ [41,'损','艮','兑'],[42,'益','巽','震'],[43,'夬','兑','乾'],[44,'姤','乾','巽'],
+ [45,'萃','兑','坤'],[46,'升','坤','巽'],[47,'困','兑','坎'],[48,'井','坎','巽'],
+ [49,'革','兑','离'],[50,'鼎','离','巽'],[51,'震','震','震'],[52,'艮','艮','艮'],
+ [53,'渐','巽','艮'],[54,'归妹','震','兑'],[55,'丰','震','离'],[56,'旅','离','艮'],
+ [57,'巽','巽','巽'],[58,'兑','兑','兑'],[59,'涣','巽','坎'],[60,'节','坎','兑'],
+ [61,'中孚','巽','兑'],[62,'小过','震','艮'],[63,'既济','坎','离'],[64,'未济','离','坎']
+];
+const yang = h => TRIGRAM_YANG[h[2]] + TRIGRAM_YANG[h[3]];
+const MESSAGE = {11:0,34:30,43:60,1:90,44:120,33:150,12:180,20:210,23:240,2:270,24:300,19:330};
+const CENTER = {II:[29,51,52], IV:[30,57,58], III:[63,64]};
+const latOfLayer = L => ({I:-60,II:-30,III:0,IV:30,V:60}[L]);
+const LAYER_COLOR = {I:'#4a90d9',II:'#5cb85c',III:'#f0ad4e',IV:'#e8643c',V:'#9b59b6',pole:'#ffd866'};
+const LAYER_META = {
+  I:{t:'I层 · 1阳 · 60°S', c:LAYER_COLOR.I},
+  II:{t:'II层 · 2阳 · 30°S', c:LAYER_COLOR.II},
+  III:{t:'III层 · 3阳 · 赤道', c:LAYER_COLOR.III},
+  IV:{t:'IV层 · 4阳 · 30°N', c:LAYER_COLOR.IV},
+  V:{t:'V层 · 5阳 · 60°N', c:LAYER_COLOR.V},
+  pole:{t:'两极 · 乾(北) 坤(南)', c:LAYER_COLOR.pole}
+};
+const SUN_ORDER = [11,34,43,1,44,33,12,20,23,2,24,19];
+
+// 十二经络（子午流注时辰表）：下标 0=寅肺…10=子胆…11=丑肝（循行按 子→亥 正序排布）
+const MERIDIAN = [
+  {tz:'寅',t:'03-05',name:'肺经',  hex:11},
+  {tz:'卯',t:'05-07',name:'大肠经',hex:34},
+  {tz:'辰',t:'07-09',name:'胃经',  hex:43},
+  {tz:'巳',t:'09-11',name:'脾经',  hex:1},
+  {tz:'午',t:'11-13',name:'心经',  hex:44},
+  {tz:'未',t:'13-15',name:'小肠经',hex:33},
+  {tz:'申',t:'15-17',name:'膀胱经',hex:12},
+  {tz:'酉',t:'17-19',name:'肾经',  hex:20},
+  {tz:'戌',t:'19-21',name:'心包经',hex:23},
+  {tz:'亥',t:'21-23',name:'三焦经',hex:2},
+  {tz:'子',t:'23-01',name:'胆经',  hex:24},
+  {tz:'丑',t:'01-03',name:'肝经',  hex:19}
+];
+const MER_COLOR = MERIDIAN.map((_,i)=> new THREE.Color().setHSL(i/12, 0.72, 0.56));
+
+// ---------- 摆位 ----------
+const place = {};
+place[1] = {lat:90, lon:0, layer:'N极', center:false};
+place[2] = {lat:-90, lon:0, layer:'S极', center:false};
+const ring = {
+  V:  HEX.filter(h=>yang(h)===5).map(h=>h[0]),
+  IV: HEX.filter(h=>yang(h)===4 && !CENTER.IV.includes(h[0])).map(h=>h[0]),
+  III:HEX.filter(h=>yang(h)===3 && !CENTER.III.includes(h[0])).map(h=>h[0]),
+  II: HEX.filter(h=>yang(h)===2 && !CENTER.II.includes(h[0])).map(h=>h[0]),
+  I:  HEX.filter(h=>yang(h)===1).map(h=>h[0])
+};
+function buildSlots(L){
+  const lat = latOfLayer(L);
+  if(L==='V'||L==='I') return [0,60,120,180,240,300].map(lon=>({lat,lon}));
+  if(L==='IV'||L==='II') return Array.from({length:12},(_,i)=>({lat,lon:i*30}));
+  const s=[]; for(const b of [0,60,120,180,240,300]) for(const o of [-15,0,15]) s.push({lat,lon:b+o});
+  return s;
+}
+for(const L of ['V','IV','II','III','I']){
+  const slots = buildSlots(L); const taken = new Array(slots.length).fill(false); const msgSlots=[];
+  for(const n of ring[L]){
+    if(MESSAGE[n]!==undefined && MESSAGE[n]!==90 && MESSAGE[n]!==270){
+      const idx = slots.findIndex((s,i)=> !taken[i] && ((s.lon%360)+360)%360 === MESSAGE[n]);
+      taken[idx]=true; place[n]={lat:slots[idx].lat, lon:slots[idx].lon, layer:L, center:false}; msgSlots.push(n);
+    }
+  }
+  let si=0;
+  for(const n of ring[L]){
+    if(msgSlots.includes(n)) continue;
+    while(si<slots.length && taken[si]) si++;
+    taken[si]=true; place[n]={lat:slots[si].lat, lon:slots[si].lon, layer:L, center:false}; si++;
+  }
+}
+// 中心双卦（完成卦/纯卦）落在 15° 经线倍数上，确保整体全部在经纬交汇点
+const CENTER_LON = {III:[330,30], IV:[15,45,75], II:[15,45,75]};
+for(const L of ['II','IV','III']){
+  const lat = latOfLayer(L);
+  CENTER[L].forEach((n,i)=>{ place[n]={lat, lon:CENTER_LON[L][i], layer:L, center:true}; });
+}
+
+// ---------- 场景 ----------
+const R = 5;
+const app = document.getElementById('app');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1117);
+const globeGroup = new THREE.Group(); scene.add(globeGroup);   // 球体整体（随循行旋转 360°）
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 16);   // 平视正对球心：起点(0h/24h)精确落在屏幕正中（原(0,4,14)斜视偏高，起点偏下）
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+app.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.autoRotateSpeed = 1.2;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(8,10,8); scene.add(dl);
+
+// 半透明球（透出球心双卦）
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(R,48,32),
+  new THREE.MeshPhongMaterial({color:0x1f6feb, transparent:true, opacity:0.07, shininess:10, side:THREE.DoubleSide})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(R,24,16),
+  new THREE.MeshBasicMaterial({color:0x30475e, wireframe:true, transparent:true, opacity:0.16})));
+
+// 经纬网（分色、分两组）
+const paraGroup = new THREE.Group();   // 纬线：金色
+const meriGroup = new THREE.Group();    // 经线：青色
+const meriFineGroup = new THREE.Group(); // 经线辅助：每15°
+function loopLine(points, color, opacity){
+  const g = new THREE.BufferGeometry().setFromPoints(points);
+  return new THREE.LineLoop(g, new THREE.LineBasicMaterial({color, transparent:true, opacity}));
+}
+// 纬线：5条主圈（对应五层）
+function paraPts(lat){ const pts=[]; for(let a=0;a<=360;a+=4){ const la=lat*Math.PI/180, lo=a*Math.PI/180;
+  pts.push(new THREE.Vector3(R*Math.cos(la)*Math.cos(lo), R*Math.sin(la), R*Math.cos(la)*Math.sin(lo))); } return pts; }
+for(const lat of [60,30,0,-30,-60]) paraGroup.add(loopLine(paraPts(lat), 0xe3a008, 0.55));
+for(let m=0;m<12;m++){
+  const lo0=m*30*Math.PI/180; const pts=[];
+  for(let a=0;a<=360;a+=4){ const la=a*Math.PI/180;
+    pts.push(new THREE.Vector3(R*Math.cos(la)*Math.cos(lo0), R*Math.sin(la), R*Math.cos(la)*Math.sin(lo0))); }
+  meriGroup.add(loopLine(pts, 0x2dd4ff, 0.4));
+}
+globeGroup.add(paraGroup); globeGroup.add(meriGroup);
+// 经线辅助：每 15° 一条，共 24 条，画在最外层球面外一点避免与主线 z-fighting
+for(let m=0;m<24;m++){
+  const lo0=m*15*Math.PI/180; const pts=[]; const rr=R*1.004;
+  for(let a=0;a<=360;a+=4){ const la=a*Math.PI/180;
+    pts.push(new THREE.Vector3(rr*Math.cos(la)*Math.cos(lo0), rr*Math.sin(la), rr*Math.cos(la)*Math.sin(lo0))); }
+  meriFineGroup.add(loopLine(pts, 0x7fe3ff, 0.16));
+}
+globeGroup.add(meriFineGroup);
+
+// 阴阳两面
+const yyGroup = new THREE.Group(); yyGroup.visible=false;
+yyGroup.add(new THREE.Mesh(new THREE.SphereGeometry(R*1.002,48,32,0,Math.PI*2,0,Math.PI/2),
+  new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.10, side:THREE.DoubleSide})));
+yyGroup.add(new THREE.Mesh(new THREE.SphereGeometry(R*1.002,48,32,0,Math.PI*2,Math.PI/2,Math.PI/2),
+  new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.22, side:THREE.DoubleSide})));
+globeGroup.add(yyGroup);
+
+// ---------- 标签（含卦图） ----------
+function roundRect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+function makeLabel(n, name, upper, lower, color){
+  const Wc=320, Hc=246, c=document.createElement('canvas'); c.width=Wc; c.height=Hc;
+  const x=c.getContext('2d');
+  x.fillStyle='rgba(13,17,23,0.86)'; roundRect(x,4,4,Wc-8,Hc-8,14); x.fill();
+  x.strokeStyle=color; x.lineWidth=3; roundRect(x,4,4,Wc-8,Hc-8,14); x.stroke();
+  // 头部：序号 + 卦名
+  x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
+  x.font='bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText(n+'  '+name, Wc/2, 34);
+  // 卦图：6爻（由下往上）
+  const lines = [...TRIGRAM_LINES[lower], ...TRIGRAM_LINES[upper]]; // 0=初爻(底)
+  const cx=Wc/2, barW=150, lh=25, yTop=72;
+  for(let i=0;i<6;i++){
+    const y = yTop + (5-i)*lh;            // i=0 画在底部
+    const isYang = lines[i]===1;
+    if(isYang){
+      x.fillStyle='#ffd866';
+      x.fillRect(cx-barW/2, y-lh*0.30, barW, lh*0.60);
+    } else {
+      x.fillStyle='#9da7b3';
+      const seg=(barW-22)/2;
+      x.fillRect(cx-barW/2, y-lh*0.30, seg, lh*0.60);
+      x.fillRect(cx+barW/2-seg, y-lh*0.30, seg, lh*0.60);
+    }
+  }
+  const tex=new THREE.CanvasTexture(c); tex.anisotropy=4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false}));
+  sp.scale.set(2.05, 1.58, 1); return sp;
+}
+function toXYZ(lat,lon,rad){
+  const la=lat*Math.PI/180, lo=lon*Math.PI/180;
+  return new THREE.Vector3(rad*Math.cos(la)*Math.cos(lo), rad*Math.sin(la), rad*Math.cos(la)*Math.sin(lo));
+}
+
+// ---------- 分图层（I-V + 两极） ----------
+const layerGroups = {};
+for(const k of ['I','II','III','IV','V','pole']) { layerGroups[k]=new THREE.Group(); globeGroup.add(layerGroups[k]); }
+const dots = [];
+function layerKeyOf(layer){ return (layer==='N极'||layer==='S极')?'pole':layer; }
+
+for(const h of HEX){
+  const n=h[0], info=place[n], key=layerKeyOf(info.layer);
+  const color = info.layer==='N极' ? '#ffd866' : info.layer==='S极' ? '#c9d1d9' : LAYER_COLOR[info.layer];
+  const pos = info.center ? new THREE.Vector3(0, R*Math.sin(info.lat*Math.PI/180), 0) : toXYZ(info.lat, info.lon, R);
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.12,12,12), new THREE.MeshBasicMaterial({color}));
+  dot.position.copy(pos);
+  const ud = {n, name:h[1], upper:h[2], lower:h[3], y:yang(h), layer:info.layer, center:info.center};
+  dot.userData = ud; layerGroups[key].add(dot); dots.push(dot);
+  // 标签卡（序号+卦名+卦图）
+  let lpos;
+  if(info.center){ const ang=(HEX.indexOf(h)%3)*2.094; lpos=new THREE.Vector3(1.8*Math.cos(ang), pos.y, 1.8*Math.sin(ang)); }
+  else lpos = toXYZ(info.lat, info.lon, R*1.20);
+  const lab = makeLabel(n, h[1], h[2], h[3], color); lab.position.copy(lpos);
+  // 全部卦图统一为「最小标准」尺寸（球面与球心一致）
+  lab.scale.set(0.62,0.48,1);
+  lab.userData = ud; layerGroups[key].add(lab);
+}
+
+// ============ 十二经络循行（新版 · Z字折返 · 独立图层） ============
+// 按原文规则重建循行路径（起点 = 三层(赤道) hex55/hex56 之间的交汇点 lon 270 = 24h 点）：
+//   横向(沿纬线)每折+15° = 虚线；纵向(沿经线上/下) = 实线；
+//   12 段对应十二经络；整条路径沿球面转满 360° 回到起点。
+// 需求K：经络循行图与球体分属两个图层 → 各自按自己方向/速度独立旋转。
+const flowGroup = new THREE.Group();   // 经络独立图层（不随球体旋转，另行驱动）
+const FLOW_R = R*1.02;                 // 紧贴球面（略外移避免与卦点重叠）
+const STEP = +15;                      // 经度递增 → 整条循行反向绕球（原 -15 为另一方向）
+const FLOW_PERIOD = 144;               // 一个完整循行(12时辰/360°)秒数（72→144 再放慢一倍，每经=12s；球体同步一整圈）
+let _lat = 0, _lon = 270;              // 起点：三层 · 55/56 之间
+const knots = [];                      // 折返节点（仅在一/三/五层）
+function _knot(){ knots.push({lat:_lat, lon:_lon}); }
+_knot();
+const segs = [];                       // {type:'solid'|'dashed', color, a, b}
+// 经络按「子午流注」时辰正序沿循行推进（绕球方向已与旧版相反，经络跟着走）：
+//   起点 0h=24h = 子时(23-01)胆经 → 每过 2h(=1/12圈)换一经：
+//   0h 子胆 → 2h 丑肝 → 4h 寅肺 → 6h 卯大肠 → 8h 辰胃 → 10h 巳脾 → 12h 午心 →
+//   14h 未小肠 → 16h 申膀胱 → 18h 酉肾 → 20h 戌心包 → 22h 亥三焦 → 24h 回到起点子胆。
+// 于是：6h(1/4圈)=大肠经、12h(半圈)=心经、18h(3/4圈)=肾经、0/24h(起点)=胆经。
+// 折向交替：偶数段先向上(60°N)、奇数段先向下(60°S)。
+const LABEL_ORDER = [10,11,0,1,2,3,4,5,6,7,8,9];   // 子丑寅卯辰巳午未申酉戌亥（=MERIDIAN 下标顺序）
+for(let k=0;k<12;k++){
+  const c = MER_COLOR[LABEL_ORDER[k]];
+  const up = (k%2===0);
+  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lat=up?60:-60; _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  _lat=0;        _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+}
+// 收尾：12 段(每段经度 +30°)后 lon=270+360=630(≡270)、lat=0 → 与起点重合，构成闭合环（24h 回到起点）
+// 把每段展开成贴球面的弧（密采样）：纵向弧经度不变、纬度插值（途经 II/IV 层）；横向弧纬度不变、经度插值
+function arcPoints(a, b, type){
+  const out=[];
+  if(type==='solid'){
+    const N=Math.max(2, Math.round(Math.abs(b.lat-a.lat)/3));
+    for(let i=0;i<=N;i++) out.push(toXYZ(a.lat+(b.lat-a.lat)*i/N, a.lon, FLOW_R));
+  } else {
+    const N=Math.max(2, Math.round(Math.abs(b.lon-a.lon)/3));
+    for(let i=0;i<=N;i++) out.push(toXYZ(a.lat, a.lon+(b.lon-a.lon)*i/N, FLOW_R));
+  }
+  return out;
+}
+// 密采样路径（贴球面）+ 每段类型/经络序号/累计弧长，供着色、流动闪动、图例联动
+const flowPts=[], flowCol=[], flowType=[], flowMer=[];
+for(const s of segs){ const ap=arcPoints(s.a, s.b, s.type); const from=flowPts.length?1:0;
+  const mer=MER_COLOR.indexOf(s.color);
+  if(flowPts.length){ // 转角处那一小段归"下一段"的类型，保证实线/虚线边界精确
+    const j=flowPts.length-1; flowType[j]=s.type; flowCol[j]=s.color; flowMer[j]=mer; }
+  for(let i=from;i<ap.length;i++){ flowPts.push(ap[i]); flowCol.push(s.color); flowType.push(s.type); flowMer.push(mer); } }
+const segLen=[], clen=[0]; let totalLen=0;
+for(let i=0;i<flowPts.length-1;i++){ const L=flowPts[i].distanceTo(flowPts[i+1]); segLen.push(L); totalLen+=L; clen.push(totalLen); }
+function flowLoc(t){ let d=t*totalLen;
+  for(let i=0;i<segLen.length;i++){ if(d<=segLen[i]){ const f=segLen[i]===0?0:d/segLen[i];
+    return {i, f}; } d-=segLen[i]; }
+  return {i:segLen.length-1, f:1}; }
+function meridianAt(t){ return flowMer[flowLoc(t).i]; }
+
+// 循行线：细管体（清晰可见）+ 沿线柔光亮窗（像太极线，无跳点、无拖尾）
+// 纵向段=实线；横向段=按沿线距离挖间隙 → 虚线
+const loopPts = flowPts.slice(0, flowPts.length-1);   // 末点与起点重合，去掉以免闭合曲线退化
+const flowCurve = new THREE.CatmullRomCurve3(loopPts, true, 'centripetal', 0.5);
+const TSEG = 1400, TRAD = 0.045, TRSEG = 8, RING = TRSEG+1;   // 管径 0.045：清晰可见
+const flowTubeGeo = new THREE.TubeGeometry(flowCurve, TSEG, TRAD, TRSEG, true);
+{ // 顶点属性：经络色 / 是否横向(虚线) / 沿线距离 / 沿线比例
+  const N = flowTubeGeo.attributes.position.count;
+  const aCol=new Float32Array(N*3), aDash=new Float32Array(N), aDist=new Float32Array(N), aT=new Float32Array(N);
+  for(let i=0;i<=TSEG;i++){
+    const u = i/TSEG;
+    const fi = Math.min(loopPts.length-1, Math.round(u*(loopPts.length-1)));
+    const c = flowCol[fi];
+    for(let j=0;j<RING;j++){ const v=i*RING+j;
+      aCol[v*3]=c.r; aCol[v*3+1]=c.g; aCol[v*3+2]=c.b;
+      aDash[v]=(flowType[fi]==='dashed')?1:0;
+      aDist[v]=clen[fi]; aT[v]=clen[fi]/totalLen; }
+  }
+  flowTubeGeo.setAttribute('aCol', new THREE.BufferAttribute(aCol,3));
+  flowTubeGeo.setAttribute('aDash', new THREE.BufferAttribute(aDash,1));
+  flowTubeGeo.setAttribute('aDist', new THREE.BufferAttribute(aDist,1));
+  flowTubeGeo.setAttribute('aT', new THREE.BufferAttribute(aT,1));
+}
+const flowUniforms = { uTime:{value:0}, uPeriod:{value:FLOW_PERIOD} };
+const FLOW_VERT = `
+  attribute vec3 aCol; attribute float aDash; attribute float aDist; attribute float aT;
+  varying vec3 vCol; varying float vDash; varying float vDist; varying float vT; varying vec3 vWorld;
+  void main(){ vCol=aCol; vDash=aDash; vDist=aDist; vT=aT;
+    vec4 wp = modelMatrix * vec4(position,1.0);
+    vWorld = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp; }`;
+// 正面亮、背面暗，但整条路径始终可见（depthTest:false → 转背面也不会被球挡住）
+// 亮度按"与头灯的有符号弧距"分层：头后(已走过)留彩色尾迹渐淡、前方只亮一小段预告、
+// 其余只是暗色的路线提示 → 七彩"走动的样子"清楚可读；头心另叠白炽，走到哪亮到哪。
+const FLOW_FRAG = `
+  uniform float uTime; uniform float uPeriod;
+  varying vec3 vCol; varying float vDash; varying float vDist; varying float vT; varying vec3 vWorld;
+  void main(){
+    if(vDash > 0.5 && fract(vDist/0.30) > 0.60) discard;   // 横向段挖间隙 → 虚线
+    float s  = fract(uTime/uPeriod);                       // 循行进度 0..1（一段=一经络）
+    float x  = fract(vT - s + 0.5) - 0.5;                  // 与头灯的带符号圆环弧距（1=整圈）
+    float bU = vT*12.0 - s*12.0;                           // 以"一经络=1"计；>0 = 在前方
+    float lit = (1.0 - smoothstep(0.0, 0.95, max(0.0,-bU)))   // 身后彩尾（收短≈1 经，紧贴灯头不漫到侧面）
+              * (1.0 - smoothstep(0.0, 0.30, max(0.0, bU)));  // 前方短预告（更贴灯头）
+    float core = 1.0 - smoothstep(0.004, 0.035, abs(x));   // 头心白炽
+    float side  = dot(normalize(vWorld), normalize(cameraPosition));
+    float front = smoothstep(-0.20, 0.25, side);           // >0 = 正面(朝我)
+    vec3 base = vCol*(0.24 + 1.15*lit) + core*vec3(1.0,0.97,0.90);  // 尾=经络本色，头=暖白
+    float alpha = mix(0.085, 0.95, lit);                   // 其余路线：暗线提示
+    alpha = alpha*mix(0.55, 1.0, front);                   // 背面再淡一档
+    alpha = max(alpha, core);                              // 头灯必然可见
+    alpha = min(alpha, 1.0);
+    gl_FragColor = vec4(base, alpha);
+  }`;
+const flowMat = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, depthTest:false, side:THREE.DoubleSide,
+  uniforms: flowUniforms, vertexShader:FLOW_VERT, fragmentShader:FLOW_FRAG });
+const flowLine = new THREE.Mesh(flowTubeGeo, flowMat);
+flowGroup.add(flowLine);
+
+// 循行"头灯"：白炽小珠 + 暖光晕，贴着路径前沿(弧距=s)走 → 走到哪、亮到哪，且始终正对观众
+const headDotMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, depthTest:false});
+const headDot = new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), headDotMat);
+const _hc=document.createElement('canvas'); _hc.width=_hc.height=128;
+const _hg=_hc.getContext('2d'); const _hgr=_hg.createRadialGradient(64,64,2,64,64,62);
+_hgr.addColorStop(0,'rgba(255,255,255,0.95)'); _hgr.addColorStop(0.35,'rgba(255,244,210,0.45)'); _hgr.addColorStop(1,'rgba(255,230,180,0)');
+_hg.fillStyle=_hgr; _hg.fillRect(0,0,128,128);
+const headHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(_hc), transparent:true,
+  depthTest:false, blending:THREE.AdditiveBlending, opacity:0.95}));
+headHalo.scale.set(1.15,1.15,1);
+const headGroup = new THREE.Group(); headGroup.add(headHalo); headGroup.add(headDot);
+flowGroup.add(headGroup);
+const _white=new THREE.Color(1,1,1), _mc=new THREE.Color();
+
+// 上下箭头（实线段中点，指向行进方向）—— 随循行线一并调细
+const arrowGeo = new THREE.ConeGeometry(0.075, 0.22, 10);
+for(const s of segs){ if(s.type!=='solid') continue;
+  const ap=arcPoints(s.a, s.b, 'solid'); const m0=Math.floor(ap.length/2);
+  const mid=ap[m0], nxt=ap[Math.min(ap.length-1, m0+1)];
+  const dir=nxt.clone().sub(mid).normalize();
+  const cone=new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({color:s.color.clone(), transparent:true, opacity:0.4, depthTest:false}));
+  cone.position.copy(mid); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+  flowGroup.add(cone);
+}
+
+// 起点标记（24h）
+const startPos = toXYZ(knots[0].lat, knots[0].lon, FLOW_R);
+const startMark = new THREE.Mesh(new THREE.SphereGeometry(0.13,14,14), new THREE.MeshBasicMaterial({color:0xffffff}));
+startMark.position.copy(startPos); flowGroup.add(startMark);
+function makeTextSprite(text,color){
+  const c=document.createElement('canvas'); c.width=256; c.height=64; const g=c.getContext('2d');
+  g.fillStyle='rgba(13,17,23,0.85)'; g.fillRect(0,0,256,64);
+  g.strokeStyle=color; g.lineWidth=3; g.strokeRect(2,2,252,60);
+  g.fillStyle=color; g.font='bold 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,128,34);
+  const t=new THREE.CanvasTexture(c); const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));
+  sp.scale.set(1.6,0.4,1); return sp;
+}
+const startLabel = makeTextSprite('0h·24h 起点', '#ffffff');
+startLabel.position.copy(startPos.clone().multiplyScalar(1.12)); flowGroup.add(startLabel);
+// 金色"球体起点"已并入循行起点标记（两者同经度、随球刚体共转），无需单独对象。
+scene.add(flowGroup);   // 经络循行 → 独立图层（不随球体转，需求K）
+
+// ---------- 太极线（太阳线：十二消息卦连线） ----------
+// 连接 SUN_ORDER 中 12 消息卦的实际球面位置（按 MESSAGE 经度 0°→330° 顺时针一圈），
+// 用闭合 CatmullRom 在球面上拉一条圆滑曲线（乾北极、坤南极穿入球体 → 似太极 S 形）。
+// 点击太极线本身即可隐藏/显示（需求J：点击可消失）。
+const sunGroup = new THREE.Group(); globeGroup.add(sunGroup);   // 随球体(顺转)层一起转
+(function(){
+  const pts = SUN_ORDER.map(n=>{
+    const p = place[n];
+    return toXYZ(p.lat===90 ? 89.999 : p.lat=== -90 ? -89.999 : p.lat, p.lon, R*1.015);
+  });
+  const curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal', 0.5);
+  const geo = new THREE.TubeGeometry(curve, 900, 0.020, 6, true);
+  const mat = new THREE.MeshBasicMaterial({ color:0xffa24d, transparent:true, opacity:0.92, depthWrite:false });
+  const line = new THREE.Mesh(geo, mat); line.userData={kind:'sun'};
+  sunGroup.add(line); sunGroup.userData.line=line;
+})();
+const sunLine = sunGroup.children[0];
+function setSunVisible(v){ sunGroup.visible=v; const cb=document.getElementById('t-sun'); if(cb) cb.checked=v; }
+
+// ---------- 图层按钮面板 ----------
+const layerRowsEl = document.getElementById('layerRows');
+const layerRowMap = {};
+for(const k of ['I','II','III','IV','V','pole']){
+  const row=document.createElement('div'); row.className='lrow';
+  row.innerHTML = `<span class="dot" style="background:${LAYER_META[k].c}"></span><span class="txt">${LAYER_META[k].t}</span>`;
+  row.addEventListener('click', ()=> setLayerVisible(k, !layerGroups[k].visible));
+  layerRowsEl.appendChild(row); layerRowMap[k]=row;
+}
+function setLayerVisible(k, vis){
+  layerGroups[k].visible = vis;
+  layerRowMap[k].classList.toggle('off', !vis);
+}
+
+// ---------- 交互：点卦 → 隐藏/显示整层 ----------
+const ray = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+let downXY=null;
+renderer.domElement.addEventListener('pointerdown', e=>{ downXY=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e=>{
+  if(!downXY) return;
+  const moved = Math.hypot(e.clientX-downXY[0], e.clientY-downXY[1]); downXY=null; if(moved>5) return;
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(dots, false)[0] || ray.intersectObjects(
+    Object.values(layerGroups).flatMap(g=>g.children.filter(o=>o.isSprite))
+      .concat(sunGroup.visible ? [sunLine] : []), false)[0];
+  if(hit){ const ud=hit.object.userData||{};
+    if(ud.kind==='sun'){ setSunVisible(false); return; }   // 点太极线 → 消失
+    toggleLayer(ud.layer); showInfo(ud); }
+});
+function toggleLayer(layer){
+  const k = layerKeyOf(layer);
+  setLayerVisible(k, !layerGroups[k].visible);
+}
+const infoBox = document.getElementById('info');
+function showInfo(d){
+  const key = layerKeyOf(d.layer);
+  const state = layerGroups[key].visible ? '已显示' : '已隐藏';
+  const layerTxt = d.layer==='N极'?'北极（乾）': d.layer==='S极'?'南极（坤）': d.layer+'层';
+  const centerTxt = d.center? '（球心双卦/完成卦）':'';
+  infoBox.style.display='block';
+  infoBox.innerHTML = `<div class="big"><b>${d.n} · ${d.name}</b></div>`+
+    `上下卦：${d.upper}上 / ${d.lower}下<br>`+
+    `阳爻数：${d.y} ｜ 位置：${layerTxt}${centerTxt}<br>`+
+    `<span style="color:#8b949e;font-size:12px">${state} ${layerTxt}（右上角图层按钮可切换）</span>`;
+}
+
+// ---------- 开关 ----------
+document.getElementById('t-rotate').addEventListener('change', e=> controls.autoRotate = e.target.checked);
+document.getElementById('t-para').addEventListener('change', e=> paraGroup.visible = e.target.checked);
+document.getElementById('t-meri').addEventListener('change', e=> meriGroup.visible = e.target.checked);
+document.getElementById('t-meri-fine').addEventListener('change', e=> meriFineGroup.visible = e.target.checked);
+document.getElementById('t-meri-path').addEventListener('change', e=> flowGroup.visible = e.target.checked);
+document.getElementById('t-yinyang').addEventListener('change', e=> yyGroup.visible = e.target.checked);
+document.getElementById('t-sun').addEventListener('change', e=> sunGroup.visible = e.target.checked);
+let curPeriod = FLOW_PERIOD;   // 共用周期：循行走满一圈的秒数 = 球体转动 360° 的秒数（1:1 同步；默认 144s，每经 144/12=12s 平均）
+document.getElementById('t-ball').addEventListener('change', e=>{ curPeriod = parseFloat(e.target.value) || FLOW_PERIOD; flowUniforms.uPeriod.value = curPeriod; });
+
+// ---------- 卦图示例（图例） ----------
+(function(){
+  const lc = document.createElement('canvas'); lc.width=46; lc.height=66;
+  const g = lc.getContext('2d');
+  g.fillStyle='rgba(13,17,23,0.92)'; g.fillRect(0,0,46,66);
+  g.strokeStyle='#ffd866'; g.lineWidth=2; g.strokeRect(1,1,44,64);
+  const lines=[...TRIGRAM_LINES['乾'], ...TRIGRAM_LINES['坤']]; // 泰：乾下坤上，阴阳皆示
+  const cx=23, barW=26, lh=9, yTop=9;
+  for(let i=0;i<6;i++){
+    const y=yTop+(5-i)*lh;
+    if(lines[i]===1){ g.fillStyle='#ffd866'; g.fillRect(cx-barW/2, y-3, barW, 6); }
+    else { g.fillStyle='#9da7b3'; const seg=(barW-6)/2; g.fillRect(cx-barW/2, y-3, seg, 6); g.fillRect(cx+barW/2-seg, y-3, seg, 6); }
+  }
+  const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
+  const t=document.createElement('span'); t.style.cssText='color:#8b949e;font-size:12px;margin-right:8px'; t.textContent='卦图示例';
+  row.appendChild(t); row.appendChild(lc);
+  document.getElementById('legend').appendChild(row);
+})();
+
+// 十二经络图例（时辰 + 经络 + 色）；merChips 供循行联动高亮
+const merChips = [];
+(function(){
+  const box=document.getElementById('merLegend');
+  MERIDIAN.forEach((m,i)=>{
+    const c='#'+MER_COLOR[i].getHexString();
+    const chip=document.createElement('div'); chip.className='chip';
+    chip.innerHTML=`<span class="sw" style="background:${c}"></span><b>${m.tz}</b><span>${m.t} ${m.name}</span>`;
+    box.appendChild(chip); merChips.push(chip);
+  });
+})();
+
+// ---------- 渲染 ----------
+addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+const _q=new URLSearchParams(location.search);                       // 调试/分享：?t=秒数&p=1 → 打开即停在指定时辰
+let flowTime=(parseFloat(_q.get('t'))||0), flowPaused=!!(_q.get('p')==='1'||_q.get('pause')==='1'); const clock=new THREE.Clock();
+let lastMer = -1;
+function syncMerLegend(u){
+  const m = meridianAt(u);
+  if(m === lastMer) return;
+  if(merChips[lastMer]) merChips[lastMer].classList.remove('on');
+  if(merChips[m]) merChips[m].classList.add('on');
+  lastMer = m;
+}
+function animate(){ requestAnimationFrame(animate); controls.update(); const dt=clock.getDelta();
+  if(started && !flowPaused) flowTime += dt;               // 未点击前静止：白点停在起点(0h)对齐正对您；点击任意处/键后才开始
+  const tt = (flowTime % curPeriod) / curPeriod;           // 0..1 = 白点沿路径走完一整圈
+  flowUniforms.uTime.value = flowTime;                     // 循行进度推进（亮窗沿路径前行，无跳点无拖尾）
+  flowUniforms.uPeriod.value = curPeriod;                  // 周期随下拉框同步（默认144s）
+  { const loc=flowLoc(tt); const A=flowPts[loc.i], B=flowPts[loc.i+1];   // 白点贴在前沿
+    if(A&&B) headGroup.position.copy(A).lerp(B, loc.f);
+    _mc.copy(MER_COLOR[flowMer[loc.i]]).lerp(_white,0.35); headDotMat.color.copy(_mc); }
+  syncMerLegend(tt);                                       // 下方十二经络图例跟着联动高亮
+  // ---- 定稿模型（按用户大白话）：白点长在球上、沿路径跑；跑到球面哪里，球就把那一面转到正对我 ----
+  // 循行线路(含白点/起点标记/箭头)与球体是"同一个整体"，每帧用同一转角 yaw，永不互相错位：
+  //   白点在整体坐标里的方位角 α = atan2(x,z)（沿路径从起点绕一整圈回到起点）；
+  //   想让白点所在的那一面正对相机，只需整体转到 yaw = 相机方位 − α。
+  //   → 球体没有任何独立转速/方向，只是"追着白点把它转到正对我"；
+  //     白点沿路径绕满 360° ⇔ 整体恰好追着转满 360°，循行结束时两者同时回到起点对齐。
+  const camA = Math.atan2(camera.position.x, camera.position.z);            // 相机当前正对的方位
+  const yaw = camA - Math.atan2(headGroup.position.x, headGroup.position.z); // 让白点所在面正对相机所需转角
+  globeGroup.rotation.y = yaw;   // 球体
+  flowGroup.rotation.y  = yaw;   // 循行线路 —— 与球刚性同转
+  renderer.render(scene,camera); }
+// 点击屏幕任意处 / 按任意键 → 才开始转动与循行（此刻起点已正对前方）
+let started = false;
+const startGate = document.getElementById('startGate');
+function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; }
+startGate.addEventListener('pointerdown', beginFlow);
+addEventListener('keydown', e=>{ if(!started){ beginFlow(); e.stopImmediatePropagation(); } });  // 首个键只负责"开始"，不触发暂停
+animate();
+addEventListener('keydown', e=>{ if(!started) return; if(e.code==='Space'){ e.preventDefault(); flowPaused=!flowPaused; document.getElementById('pauseBadge').style.display = flowPaused?'block':'none'; } });
+</script>
+</body>
+</html>
