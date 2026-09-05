@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="41ojZsP56ETJ4ar0tv6HV1">
-<head data-page-node-id="X4GmZonpMFPeswbsaWlnRy">
-<meta charset="UTF-8" data-page-node-id="3MYRbMMwcXSMdCamKPZQCL" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="HWLO22bKsHAentHG3nORCq" />
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>易球 · 易经三维宇宙映像（可旋转）</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -46,44 +46,44 @@
   #startGate .t2 b { color:#ffd866; font-weight:600; }
 </style>
 </head>
-<body data-page-node-id="2liERPfGg89fbDoJNvL2nu">
-<div id="app" data-page-node-id="WDeQs3YmqvsM8sB9WIsvS7"></div>
+<body>
+<div id="app"></div>
 
-<div id="ui" class="panel" data-page-node-id="zEmjaXqrCVGV3fD1lYJc77">
-  <h1 data-page-node-id="MQYVfttmTAZckBaj4zWVT4">易球 · 三维宇宙映像</h1>
-  <div class="hint" data-page-node-id="I0qGM998pRRzxwIbuXEZKB">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
-  <label data-page-node-id="MKxW6HtAWwJHaqFTufwnvA"><input type="checkbox" id="t-rotate" data-page-node-id="No7MqsvrXC7fAPPCHdR50T" /> 自动旋转</label>
+<div id="ui" class="panel">
+  <h1>易球 · 三维宇宙映像</h1>
+  <div class="hint">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
+  <label><input type="checkbox" id="t-rotate" /> 自动旋转</label>
   <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>
-  <label data-page-node-id="MyhDrsm2QfjrYgiKjBWTGa"><input type="checkbox" id="t-para" checked data-page-node-id="W0qSqDk4yBOGk0kgbqc3VL" /> 纬线（金色 · 5圈）</label>
-  <label data-page-node-id="MkDSwxEdiP4vz6lkI2WJD6"><input type="checkbox" id="t-meri" checked data-page-node-id="g0XjrDMZIoI4qEXdEJtemF" /> 经线（青色 · 12条）</label>
-  <label data-page-node-id="SzbDpPk3Yu9hSzFO01crJz"><input type="checkbox" id="t-meri-fine" checked data-page-node-id="f2GduHovHxi8pfaXeDjYJu" /> 经线辅助（青淡 · 每15°·24条）</label>
-  <label data-page-node-id="8C8D1T0yoslLq21YPqWb4w"><input type="checkbox" id="t-meri-path" checked data-page-node-id="zJIh7Et4WCSolKgSoUiIV6" /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
-  <label data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l2"><input type="checkbox" id="t-sun" checked data-page-node-id="a1b2c3d4e5f6g7h8i9j0k1l3" /> 太极线（十二消息卦 · 点击可消失）</label>
-  <label data-page-node-id="ueUmZdopWwMmwCbkyEI3vX"><input type="checkbox" id="t-yinyang" data-page-node-id="5eQQ2GEfgskltHE8ZYQdBD" /> 阴阳两面（半球着色）</label>
-  <div id="legend" data-page-node-id="ZeiqRlLCXWi3WFnuIC4iB7">
-    <div class="row" data-page-node-id="W4UROllz0tqKymnxScPxLF"><span class="dot" style="background:#4a90d9" data-page-node-id="rbK5lPfbEfZO1CkoURNOOH"></span> I层 · 1阳爻（60°S）</div>
-    <div class="row" data-page-node-id="teIMI4iJKYOib0SwHTpASu"><span class="dot" style="background:#5cb85c" data-page-node-id="G9khZmvXjHEHC2YHxp25Zo"></span> II层 · 2阳爻（30°S）</div>
-    <div class="row" data-page-node-id="jYCOIMj6Ww4FFx98CSDAu9"><span class="dot" style="background:#f0ad4e" data-page-node-id="ruyOBvl8omHJ8TnqvfPF4S"></span> III层 · 3阳爻（赤道）</div>
-    <div class="row" data-page-node-id="V5IPq06Ns9gymeie4Ojllb"><span class="dot" style="background:#e8643c" data-page-node-id="K93Hhdu7QEfZvHBGIWUbvR"></span> IV层 · 4阳爻（30°N）</div>
-    <div class="row" data-page-node-id="HX9eqkLRELYFtXrwbegx6i"><span class="dot" style="background:#9b59b6" data-page-node-id="rn2R5YotaApAjUNbSi7Az6"></span> V层 · 5阳爻（60°N）</div>
-    <div class="row" data-page-node-id="YFaP8oVFNBonL3dGJE9I1y"><span class="dot" style="background:#ffd866" data-page-node-id="t7bOcz3YlOhKsZD4Lh6ORH"></span> 乾北极 / 坤南极 ｜ 实心线=上下(经线) · 虚线=横向(纬线)</div>
-    <div class="row" data-page-node-id="6bX7UpgAZPn3gziaLkFAqF"><span class="ln" style="border-color:#e3a008" data-page-node-id="gR5ZHDII4PB4hkbusAf1ou"></span> 纬线（平行圈）</div>
-    <div class="row" data-page-node-id="HtlMcDoCJ2nurlziVT4sPB"><span class="ln" style="border-color:#2dd4ff" data-page-node-id="frqlpPDbu2DVCCAQuvA2XL"></span> 经线（过两极）</div>
-    <div class="row" data-page-node-id="YQzBdNMjnoYjA68lYjwlxM"><span class="ln" style="border-color:#7fe3ff" data-page-node-id="PuqnMkVGtFiVJ7KN0XHojm"></span> 经线辅助（每15°）</div>
-    <div class="row" data-page-node-id="q1w2e3r4t5y6u7i8o9p0a1s2"><span class="ln" style="border-color:#ffa24d" data-page-node-id="q1w2e3r4t5y6u7i8o9p0a1s3"></span> 太极线（太阳线 · 点线可隐藏）</div>
+  <label><input type="checkbox" id="t-para" checked /> 纬线（金色 · 5圈）</label>
+  <label><input type="checkbox" id="t-meri" checked /> 经线（青色 · 12条）</label>
+  <label><input type="checkbox" id="t-meri-fine" checked /> 经线辅助（青淡 · 每15°·24条）</label>
+  <label><input type="checkbox" id="t-meri-path" checked /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
+  <label><input type="checkbox" id="t-sun" checked /> 太极线（十二消息卦 · 点击可消失）</label>
+  <label><input type="checkbox" id="t-yinyang" /> 阴阳两面（半球着色）</label>
+  <div id="legend">
+    <div class="row"><span class="dot" style="background:#4a90d9"></span> I层 · 1阳爻（60°S）</div>
+    <div class="row"><span class="dot" style="background:#5cb85c"></span> II层 · 2阳爻（30°S）</div>
+    <div class="row"><span class="dot" style="background:#f0ad4e"></span> III层 · 3阳爻（赤道）</div>
+    <div class="row"><span class="dot" style="background:#e8643c"></span> IV层 · 4阳爻（30°N）</div>
+    <div class="row"><span class="dot" style="background:#9b59b6"></span> V层 · 5阳爻（60°N）</div>
+    <div class="row"><span class="dot" style="background:#ffd866"></span> 乾北极 / 坤南极 ｜ 实心线=上下(经线) · 虚线=横向(纬线)</div>
+    <div class="row"><span class="ln" style="border-color:#e3a008"></span> 纬线（平行圈）</div>
+    <div class="row"><span class="ln" style="border-color:#2dd4ff"></span> 经线（过两极）</div>
+    <div class="row"><span class="ln" style="border-color:#7fe3ff"></span> 经线辅助（每15°）</div>
+    <div class="row"><span class="ln" style="border-color:#ffa24d"></span> 太极线（太阳线 · 点线可隐藏）</div>
   </div>
 </div>
 
-<div id="layers" class="panel" data-page-node-id="QDTP3AkhAYgq3qWCZGz9SD">
-  <h2 data-page-node-id="sWMstl1rycAwC4HE4D09o9">图层（点此隐藏 / 显示）</h2>
-  <div id="layerRows" data-page-node-id="fkhTwFKQ6CgsxigSsjI97K"></div>
+<div id="layers" class="panel">
+  <h2>图层（点此隐藏 / 显示）</h2>
+  <div id="layerRows"></div>
 </div>
 
-<div id="info" class="panel" data-page-node-id="C4VJM8rMJuZdad31lnqlj0"></div>
-<div id="merLegend" class="panel" data-page-node-id="MStTEkv30uJl2KQ3qwGF0D"></div>
+<div id="info" class="panel"></div>
+<div id="merLegend" class="panel"></div>
 <div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点长在球面上，正停在 <b>0h·24h 起点（子时胆经）</b>、正对您<br>点击后：白点沿贴在球上的循行路径出发，跑满一整圈<br>球体没有自己的转速/方向 —— 只负责"白点跑到哪一面，就把那一面转到正对我"<br>白点跑完一圈 ⇔ 球体正好追着转满 360°，二者同时回到起点（默认 144s/圈，每经 12s）<br>再按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
-<div id="pauseBadge" class="panel" data-page-node-id="MtuxJ58u9YBBZBtPyOLOBD">⏸ 已暂停（空格继续）</div>
-<div id="credits" data-page-node-id="1CCagIRxLF1lmqmfLOvBXA">来源：J. Drasny《易球》 · 三维摆位按书重构</div>
+<div id="pauseBadge" class="panel">⏸ 已暂停（空格继续）</div>
+<div id="credits">来源：J. Drasny《易球》 · 三维摆位按书重构</div>
 
 <script type="importmap">
 {
