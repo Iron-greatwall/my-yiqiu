@@ -11,7 +11,14 @@
   #app { position:fixed; inset:0; }
   .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
   #ui { top:12px; left:12px; max-width:262px; }
-  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; }
+  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .xbtn { cursor:pointer; color:#8b949e; font-size:14px; padding:0 3px; border-radius:6px; background:none; border:none; line-height:1; flex:0 0 auto; }
+  .xbtn:hover { color:#ffd866; background:rgba(255,216,102,.14); }
+  .panel.hidden { display:none !important; }
+  .corner-btn { position:fixed; z-index:9; top:12px; border:1px solid #30363d; background:rgba(22,27,34,.72); color:#e6edf3; font-size:12px; padding:6px 13px; border-radius:999px; cursor:pointer; backdrop-filter:blur(4px); opacity:.85; user-select:none; }
+  .corner-btn:hover { opacity:1; border-color:#ffd866; color:#ffd866; }
+  .corner-btn.cb-ui { left:12px; }
+  .corner-btn.cb-layers { right:12px; }
   #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
   #ui label { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
   #ui input { accent-color:#ffd866; }
@@ -65,9 +72,12 @@
 <body>
 <div id="app"></div>
 
+<button id="btnUi" class="corner-btn cb-ui" style="display:none" title="显示左上控制面板">⚙ 控制</button>
+<button id="btnLayers" class="corner-btn cb-layers" style="display:none" title="显示右上图层面板">🗂 图层</button>
+
 <div id="ui" class="panel">
-  <h1>易球 · 精油卡三维映像</h1>
-  <div class="hint aux">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 单击卡=档案 ｜ 双击=收卡 ｜ 空格=暂停循经</div>
+  <h1><span>易球 · 精油卡三维映像</span><button id="uiClose" class="xbtn" title="收起此面板（点左上 ⚙ 可恢复）">✕</button></h1>
+  <div class="hint aux">🖱 拖动 ｜ 滚轮缩放 ｜ 单击牌=卦·油档案 ｜ 双击=收牌 ｜ 循行时消息卦牌自动放大 ｜ 空格=暂停</div>
   <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-top:1px solid #30363d;padding-top:6px;margin-bottom:2px;font-size:12px">
     <span style="color:#8b949e">牌面：</span>
     <label style="display:inline-flex;font-size:12px;gap:4px"><input type="radio" name="cv" id="cv-oil" value="oil" checked/> 精油牌</label>
@@ -82,20 +92,12 @@
   <label><input type="checkbox" id="t-meri-path" checked /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
   <label><input type="checkbox" id="t-sun" checked /> 太极线（十二消息卦 · 点击可消失）</label>
   <label><input type="checkbox" id="t-yinyang" /> 阴阳两面（半球着色）</label>
-  <div id="legend" class="aux">
-    <div class="row"><span class="dot" style="background:#4a90d9"></span> I层 · 1阳爻（60°S）</div>
-    <div class="row"><span class="dot" style="background:#5cb85c"></span> II层 · 2阳爻（30°S）</div>
-    <div class="row"><span class="dot" style="background:#f0ad4e"></span> III层 · 3阳爻（赤道）</div>
-    <div class="row"><span class="dot" style="background:#e8643c"></span> IV层 · 4阳爻（30°N）</div>
-    <div class="row"><span class="dot" style="background:#9b59b6"></span> V层 · 5阳爻（60°N）</div>
-    <div class="row"><span class="dot" style="background:#ffd866"></span> 乾北极 / 坤南极</div>
-    <div class="row" style="margin-top:8px;color:#8b949e;font-size:12px">🃏 64卦=64支精油卡：单击看档案、双击即消；循行时对应消息卦卡自动放大</div>
-  </div>
+  <div id="legend" class="aux" style="display:none"></div>
   <button id="btnReset" style="width:100%;margin-top:8px;padding:5px 0;border-radius:8px;border:1px solid #30363d;background:rgba(255,216,102,.12);color:#ffd866;cursor:pointer;font-size:13px">♻ 复原全部牌</button>
 </div>
 
 <div id="layers" class="panel">
-  <h2>图层（点此隐藏 / 显示）</h2>
+  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px">卦层（点击隐藏/显示）<button id="layersClose" class="xbtn" title="收起此面板（点右上 🗂 可恢复）">✕</button></h2>
   <div id="layerRows"></div>
 </div>
 
@@ -810,24 +812,15 @@ document.querySelectorAll('input[name="cv"]').forEach(r=> r.addEventListener('ch
 // "说明"总开关：隐藏/显示 操作提示·层色图例·经络图例·信息条等（.aux 元素）
 document.getElementById('t-aux').addEventListener('change', e=> document.body.classList.toggle('aux-off', !e.target.checked));
 
-// ---------- 卦图示例（图例） ----------
-(function(){
-  const lc = document.createElement('canvas'); lc.width=46; lc.height=66;
-  const g = lc.getContext('2d');
-  g.fillStyle='rgba(13,17,23,0.92)'; g.fillRect(0,0,46,66);
-  g.strokeStyle='#ffd866'; g.lineWidth=2; g.strokeRect(1,1,44,64);
-  const lines=[...TRIGRAM_LINES['乾'], ...TRIGRAM_LINES['坤']]; // 泰：乾下坤上，阴阳皆示
-  const cx=23, barW=26, lh=9, yTop=9;
-  for(let i=0;i<6;i++){
-    const y=yTop+(5-i)*lh;
-    if(lines[i]===1){ g.fillStyle='#ffd866'; g.fillRect(cx-barW/2, y-3, barW, 6); }
-    else { g.fillStyle='#9da7b3'; const seg=(barW-6)/2; g.fillRect(cx-barW/2, y-3, seg, 6); g.fillRect(cx+barW/2-seg, y-3, seg, 6); }
-  }
-  const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
-  const t=document.createElement('span'); t.style.cssText='color:#8b949e;font-size:12px;margin-right:8px'; t.textContent='卦图示例';
-  row.appendChild(t); row.appendChild(lc);
-  document.getElementById('legend').appendChild(row);
-})();
+// 面板收起/恢复：左上控制面板、右上图层面板（点 ✕ 收起 → 角落出现 ⚙/🗂 小钮 → 点钮恢复）
+function bindPanelToggle(panelId, closeId, btnId){
+  const el=document.getElementById(panelId), close=document.getElementById(closeId), btn=document.getElementById(btnId);
+  if(!el||!close||!btn) return;
+  close.addEventListener('click', ()=>{ el.classList.add('hidden'); btn.style.display='inline-block'; });
+  btn.addEventListener('click', ()=>{ el.classList.remove('hidden'); btn.style.display='none'; });
+}
+bindPanelToggle('ui','uiClose','btnUi');
+bindPanelToggle('layers','layersClose','btnLayers');
 
 // 十二经络图例（时辰 + 经络 + 色）；merChips 供循行联动高亮
 const merChips = [];
