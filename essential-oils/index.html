@@ -8,6 +8,8 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; overflow:hidden; background:#0d1117; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; color:#e6edf3; }
   body.aux-off .aux { visibility:hidden; }
+  /* 启动前：隐藏底部经络图例/署名/信息条，让画面干净；点开始后自动出现 */
+  body:not(.started) #merLegend, body:not(.started) #credits, body:not(.started) #info { visibility:hidden; }
   #app { position:fixed; inset:0; }
   .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
   #ui { top:12px; left:12px; max-width:262px; }
@@ -67,6 +69,17 @@
   .cardInfo .ci-btn { display:block; width:100%; margin-top:9px; padding:6px 0; border-radius:8px; border:1px solid rgba(255,216,102,.55); background:rgba(255,216,102,.12); color:#ffd866; cursor:pointer; font-size:13px; }
   .cardInfo .ci-note { color:#6e7681; font-size:11px; margin-top:6px; }
   .cardInfo::-webkit-scrollbar { width:6px; } .cardInfo::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+  /* 窄屏（手机竖屏）：两上角面板按屏宽比例收窄，避免在顶部互相重叠 */
+  @media (max-width:700px){
+    #ui { top:8px; left:6px; max-width:min(262px,48vw); padding:9px 10px; }
+    #layers { top:8px; right:6px; min-width:0; max-width:min(200px,48vw); padding:9px 10px; }
+    #layers h2 { font-size:12px; }
+    #ui h1 { font-size:14px; }
+    #pauseBadge { top:8px; font-size:12px; }
+    #merLegend { bottom:44px; right:8px; }
+    #credits { bottom:8px; right:8px; font-size:10px; }
+    #info { bottom:8px; left:8px; min-width:0; max-width:calc(100vw - 16px); }
+  }
 </style>
 </head>
 <body>
@@ -821,6 +834,11 @@ function bindPanelToggle(panelId, closeId, btnId){
 }
 bindPanelToggle('ui','uiClose','btnUi');
 bindPanelToggle('layers','layersClose','btnLayers');
+// 手机窄屏：默认收起两面板（观感干净、不遮球体），点角落 ⚙/🗂 可随时展开
+if(innerWidth<=700){
+  ['ui','layers'].forEach(pid=>{ const el=document.getElementById(pid), btn=document.getElementById(pid==='ui'?'btnUi':'btnLayers');
+    if(el&&btn){ el.classList.add('hidden'); btn.style.display='inline-block'; } });
+}
 
 // 十二经络图例（时辰 + 经络 + 色）；merChips 供循行联动高亮
 const merChips = [];
@@ -864,13 +882,16 @@ function animate(){ window.__dbg.anim=true; requestAnimationFrame(animate); cont
   //     白点沿路径绕满 360° ⇔ 整体恰好追着转满 360°，循行结束时两者同时回到起点对齐。
   const camA = Math.atan2(camera.position.x, camera.position.z);            // 相机当前正对的方位
   const yaw = camA - Math.atan2(headGroup.position.x, headGroup.position.z); // 让白点所在面正对相机所需转角
-  globeGroup.rotation.y = yaw;   // 球体
-  flowGroup.rotation.y  = yaw;   // 循行线路 —— 与球刚性同转
+  // 循行进行中：一体追点（白点跑到哪一面，球就把那一面转到正对我）——用户定稿模型
+  // 未开始 / 暂停：冻结当前转角 → 可自由拖拽从任意角度观察球体（上下左右旋转）
+  if(started && !flowPaused){ globeGroup.rotation.y = yaw; flowGroup.rotation.y = yaw; }
+  else if(!started && !freeTiltDone){ freeTiltDone = true; globeGroup.rotation.y = yaw; flowGroup.rotation.y = yaw; }
   renderer.render(scene,camera); }
 // 点击屏幕任意处 / 按任意键 → 才开始转动与循行（此刻起点已正对前方）
 let started = false;
+let freeTiltDone = false;   // 未开始阶段仅把起点转到正面一次，之后交还手动拖拽
 const startGate = document.getElementById('startGate');
-function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; }
+function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; document.body.classList.add('started'); }
 startGate.addEventListener('pointerdown', beginFlow);
 addEventListener('keydown', e=>{ if(!started){ beginFlow(); e.stopImmediatePropagation(); } });  // 首个键只负责"开始"，不触发暂停
 animate();

@@ -7,10 +7,20 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; overflow:hidden; background:#0d1117; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif; color:#e6edf3; }
+  body.aux-off .aux { visibility:hidden; }
+  /* 启动前：隐藏底部经络图例/署名/信息条，让画面干净；点开始后自动出现 */
+  body:not(.started) #merLegend, body:not(.started) #credits, body:not(.started) #info { visibility:hidden; }
   #app { position:fixed; inset:0; }
   .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
+  .panel.hidden { display:none !important; }
+  .corner-btn { position:fixed; z-index:9; top:12px; border:1px solid #30363d; background:rgba(22,27,34,.72); color:#e6edf3; font-size:12px; padding:6px 13px; border-radius:999px; cursor:pointer; backdrop-filter:blur(4px); opacity:.85; user-select:none; }
+  .corner-btn:hover { opacity:1; border-color:#ffd866; color:#ffd866; }
+  .corner-btn.cb-ui { left:12px; }
+  .corner-btn.cb-layers { right:12px; }
   #ui { top:12px; left:12px; max-width:262px; }
-  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .xbtn { cursor:pointer; color:#8b949e; font-size:14px; padding:0 3px; border-radius:6px; background:none; border:none; line-height:1; flex:0 0 auto; }
+  .xbtn:hover { color:#ffd866; background:rgba(255,216,102,.14); }
   .go-ess { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; color:#0d1117; background:linear-gradient(135deg,#7ee8a2,#4fc3f7); border-radius:999px; padding:3px 10px; text-decoration:none; white-space:nowrap; }
   .go-ess:hover { filter:brightness(1.12); }
   #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
@@ -32,28 +42,46 @@
   #info b { color:#ffd866; }
   #info .big { font-size:18px; }
   #credits { position:fixed; bottom:12px; right:12px; z-index:10; color:#6e7681; font-size:11px; }
-  #merLegend { bottom:12px; left:50%; transform:translateX(-50%); max-width:94vw; display:flex; flex-wrap:wrap; gap:5px 8px; justify-content:center; padding:8px 10px; }
-  #merLegend .chip { display:flex; align-items:center; gap:5px; font-size:11px; white-space:nowrap; padding:2px 7px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
-  #merLegend .chip .sw { width:10px; height:10px; border-radius:2px; flex:0 0 auto; }
+  #merLegend { bottom:46px; right:12px; left:auto; transform:none; max-width:min(320px,88vw); display:flex; flex-wrap:wrap; gap:4px 6px; justify-content:flex-end; padding:7px 9px; }
+  #merLegend .chip { display:flex; align-items:center; gap:4px; font-size:10px; white-space:nowrap; padding:2px 6px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
+  #merLegend .chip .sw { width:8px; height:8px; border-radius:2px; flex:0 0 auto; }
   #merLegend .chip b { color:#e6edf3; font-weight:600; }
   #merLegend .chip span { color:#8b949e; }
   #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
   #merLegend .chip.on b { color:#ffd866; }
   #merLegend .chip.on span { color:#e6edf3; }
   #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
-  #startGate { position:fixed; inset:0; z-index:30; display:flex; align-items:center; justify-content:center; background:rgba(13,17,23,.42); cursor:pointer; user-select:none; }
-  #startGate .box { background:rgba(22,27,34,.92); border:1px solid #ffd866; border-radius:14px; padding:26px 42px; text-align:center; backdrop-filter:blur(4px); box-shadow:0 8px 40px rgba(0,0,0,.5); }
-  #startGate .t1 { font-size:20px; color:#ffd866; margin-bottom:10px; }
-  #startGate .t2 { font-size:13px; color:#9aa4b2; line-height:1.9; }
+  #startGate { position:fixed; inset:0; z-index:40; cursor:pointer; user-select:none; background:rgba(13,17,23,.30); }
+  #startGate .box { position:absolute; right:14px; bottom:64px; width:min(290px,80vw); background:rgba(22,27,34,.94); border:1px solid rgba(255,216,102,.5); border-radius:12px; padding:12px 14px; backdrop-filter:blur(4px); box-shadow:0 8px 30px rgba(0,0,0,.5); text-align:left; }
+  #startGate .t1 { font-size:15px; color:#ffd866; margin-bottom:6px; }
+  #startGate .t2 { font-size:12px; color:#9aa4b2; line-height:1.7; }
   #startGate .t2 b { color:#ffd866; font-weight:600; }
+  /* 窄屏（手机竖屏）：两上角面板按屏宽比例收窄，避免在顶部互相重叠 */
+  @media (max-width:700px){
+    #ui { top:8px; left:6px; max-width:min(262px,48vw); padding:9px 10px; }
+    #layers { top:8px; right:6px; min-width:0; max-width:min(200px,48vw); padding:9px 10px; }
+    #layers h2 { font-size:12px; }
+    #ui h1 { font-size:14px; }
+    #pauseBadge { top:8px; font-size:12px; }
+    #merLegend { bottom:44px; right:8px; }
+    #credits { bottom:8px; right:8px; font-size:10px; }
+    #info { bottom:8px; left:8px; min-width:0; max-width:calc(100vw - 16px); }
+  }
 </style>
 </head>
 <body>
 <div id="app"></div>
 
+<button id="btnUi" class="corner-btn cb-ui" style="display:none" title="显示左上控制面板">⚙ 控制</button>
+<button id="btnLayers" class="corner-btn cb-layers" style="display:none" title="显示右上图层面板">🗂 图层</button>
+
 <div id="ui" class="panel">
-  <h1>易球 · 三维宇宙映像 <a class="go-ess" href="essential-oils/" target="_self" rel="noopener">💧 精油卡3D ›</a></h1>
-  <div class="hint">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
+  <h1>易球 · 三维宇宙映像<button id="uiClose" class="xbtn" title="收起此面板（点左上 ⚙ 可恢复）">✕</button></h1>
+  <div class="hint aux">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-top:1px solid #30363d;padding-top:6px;margin-bottom:2px;font-size:12px">
+    <a class="go-ess" href="essential-oils/" target="_self" rel="noopener">💧 精油卡3D ›</a>
+    <label style="display:inline-flex;font-size:12px;gap:4px;margin-left:auto" title="显示/隐藏 操作提示·经络图例·信息条·署名等文字说明"><input type="checkbox" id="t-aux" checked/> 说明</label>
+  </div>
   <label><input type="checkbox" id="t-rotate" /> 自动旋转</label>
   <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>
   <label><input type="checkbox" id="t-para" checked /> 纬线（金色 · 5圈）</label>
@@ -62,30 +90,19 @@
   <label><input type="checkbox" id="t-meri-path" checked /> 十二经络循行（独立层 · 实线上下/虚线横向）</label>
   <label><input type="checkbox" id="t-sun" checked /> 太极线（十二消息卦 · 点击可消失）</label>
   <label><input type="checkbox" id="t-yinyang" /> 阴阳两面（半球着色）</label>
-  <div id="legend">
-    <div class="row"><span class="dot" style="background:#4a90d9"></span> I层 · 1阳爻（60°S）</div>
-    <div class="row"><span class="dot" style="background:#5cb85c"></span> II层 · 2阳爻（30°S）</div>
-    <div class="row"><span class="dot" style="background:#f0ad4e"></span> III层 · 3阳爻（赤道）</div>
-    <div class="row"><span class="dot" style="background:#e8643c"></span> IV层 · 4阳爻（30°N）</div>
-    <div class="row"><span class="dot" style="background:#9b59b6"></span> V层 · 5阳爻（60°N）</div>
-    <div class="row"><span class="dot" style="background:#ffd866"></span> 乾北极 / 坤南极 ｜ 实心线=上下(经线) · 虚线=横向(纬线)</div>
-    <div class="row"><span class="ln" style="border-color:#e3a008"></span> 纬线（平行圈）</div>
-    <div class="row"><span class="ln" style="border-color:#2dd4ff"></span> 经线（过两极）</div>
-    <div class="row"><span class="ln" style="border-color:#7fe3ff"></span> 经线辅助（每15°）</div>
-    <div class="row"><span class="ln" style="border-color:#ffa24d"></span> 太极线（太阳线 · 点线可隐藏）</div>
-  </div>
+  <div id="legend" class="aux" style="display:none"></div>
 </div>
 
 <div id="layers" class="panel">
-  <h2>图层（点此隐藏 / 显示）</h2>
+  <h2 style="display:flex;align-items:center;justify-content:space-between;gap:8px">卦层（点击隐藏/显示）<button id="layersClose" class="xbtn" title="收起此面板（点右上 🗂 可恢复）">✕</button></h2>
   <div id="layerRows"></div>
 </div>
 
-<div id="info" class="panel"></div>
-<div id="merLegend" class="panel"></div>
-<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点长在球面上，正停在 <b>0h·24h 起点（子时胆经）</b>、正对您<br>点击后：白点沿贴在球上的循行路径出发，跑满一整圈<br>球体没有自己的转速/方向 —— 只负责"白点跑到哪一面，就把那一面转到正对我"<br>白点跑完一圈 ⇔ 球体正好追着转满 360°，二者同时回到起点（默认 144s/圈，每经 12s）<br>再按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
+<div id="info" class="panel aux"></div>
+<div id="merLegend" class="panel aux"></div>
+<div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点停在 <b>0h·24h 起点（子时胆经）</b>正对您；点击后白点跑满一圈 ⇔ 球体同步转满 360°（默认 144s/圈）<br>按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
 <div id="pauseBadge" class="panel">⏸ 已暂停（空格继续）</div>
-<div id="credits">来源：J. Drasny《易球》 · 三维摆位按书重构</div>
+<div id="credits" class="aux">来源：J. Drasny《易球》 · 三维摆位按书重构</div>
 
 <script type="importmap">
 {
@@ -551,24 +568,22 @@ document.getElementById('t-sun').addEventListener('change', e=> sunGroup.visible
 let curPeriod = FLOW_PERIOD;   // 共用周期：循行走满一圈的秒数 = 球体转动 360° 的秒数（1:1 同步；默认 144s，每经 144/12=12s 平均）
 document.getElementById('t-ball').addEventListener('change', e=>{ curPeriod = parseFloat(e.target.value) || FLOW_PERIOD; flowUniforms.uPeriod.value = curPeriod; });
 
-// ---------- 卦图示例（图例） ----------
-(function(){
-  const lc = document.createElement('canvas'); lc.width=46; lc.height=66;
-  const g = lc.getContext('2d');
-  g.fillStyle='rgba(13,17,23,0.92)'; g.fillRect(0,0,46,66);
-  g.strokeStyle='#ffd866'; g.lineWidth=2; g.strokeRect(1,1,44,64);
-  const lines=[...TRIGRAM_LINES['乾'], ...TRIGRAM_LINES['坤']]; // 泰：乾下坤上，阴阳皆示
-  const cx=23, barW=26, lh=9, yTop=9;
-  for(let i=0;i<6;i++){
-    const y=yTop+(5-i)*lh;
-    if(lines[i]===1){ g.fillStyle='#ffd866'; g.fillRect(cx-barW/2, y-3, barW, 6); }
-    else { g.fillStyle='#9da7b3'; const seg=(barW-6)/2; g.fillRect(cx-barW/2, y-3, seg, 6); g.fillRect(cx+barW/2-seg, y-3, seg, 6); }
-  }
-  const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
-  const t=document.createElement('span'); t.style.cssText='color:#8b949e;font-size:12px;margin-right:8px'; t.textContent='卦图示例';
-  row.appendChild(t); row.appendChild(lc);
-  document.getElementById('legend').appendChild(row);
-})();
+// "说明"总开关：隐藏/显示 操作提示·经络图例·信息条·署名等文字说明（.aux 元素）
+document.getElementById('t-aux').addEventListener('change', e=> document.body.classList.toggle('aux-off', !e.target.checked));
+// 面板收起/恢复：左上控制面板、右上图层面板（点 ✕ 收起 → 角落出现 ⚙/🗂 小钮 → 点钮恢复）
+function bindPanelToggle(panelId, closeId, btnId){
+  const el=document.getElementById(panelId), close=document.getElementById(closeId), btn=document.getElementById(btnId);
+  if(!el||!close||!btn) return;
+  close.addEventListener('click', ()=>{ el.classList.add('hidden'); btn.style.display='inline-block'; });
+  btn.addEventListener('click', ()=>{ el.classList.remove('hidden'); btn.style.display='none'; });
+}
+bindPanelToggle('ui','uiClose','btnUi');
+bindPanelToggle('layers','layersClose','btnLayers');
+// 手机窄屏：默认收起两面板（观感干净、不遮球体），点角落 ⚙/🗂 可随时展开
+if(innerWidth<=700){
+  ['ui','layers'].forEach(pid=>{ const el=document.getElementById(pid), btn=document.getElementById(pid==='ui'?'btnUi':'btnLayers');
+    if(el&&btn){ el.classList.add('hidden'); btn.style.display='inline-block'; } });
+}
 
 // 十二经络图例（时辰 + 经络 + 色）；merChips 供循行联动高亮
 const merChips = [];
@@ -611,13 +626,16 @@ function animate(){ requestAnimationFrame(animate); controls.update(); const dt=
   //     白点沿路径绕满 360° ⇔ 整体恰好追着转满 360°，循行结束时两者同时回到起点对齐。
   const camA = Math.atan2(camera.position.x, camera.position.z);            // 相机当前正对的方位
   const yaw = camA - Math.atan2(headGroup.position.x, headGroup.position.z); // 让白点所在面正对相机所需转角
-  globeGroup.rotation.y = yaw;   // 球体
-  flowGroup.rotation.y  = yaw;   // 循行线路 —— 与球刚性同转
+  // 循行进行中：一体追点（白点跑到哪一面，球就把那一面转到正对我）——用户定稿模型
+  // 未开始 / 暂停：冻结当前转角 → 可自由拖拽从任意角度观察球体（上下左右旋转）
+  if(started && !flowPaused){ globeGroup.rotation.y = yaw; flowGroup.rotation.y = yaw; }
+  else if(!started && !freeTiltDone){ freeTiltDone = true; globeGroup.rotation.y = yaw; flowGroup.rotation.y = yaw; }
   renderer.render(scene,camera); }
 // 点击屏幕任意处 / 按任意键 → 才开始转动与循行（此刻起点已正对前方）
 let started = false;
+let freeTiltDone = false;   // 未开始阶段仅把起点转到正面一次，之后交还手动拖拽
 const startGate = document.getElementById('startGate');
-function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; }
+function beginFlow(){ if(started) return; started = true; startGate.style.display = 'none'; document.body.classList.add('started'); }
 startGate.addEventListener('pointerdown', beginFlow);
 addEventListener('keydown', e=>{ if(!started){ beginFlow(); e.stopImmediatePropagation(); } });  // 首个键只负责"开始"，不触发暂停
 animate();
