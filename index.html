@@ -10,7 +10,9 @@
   #app { position:fixed; inset:0; }
   .panel { position:fixed; z-index:10; background:rgba(22,27,34,.82); border:1px solid #30363d; border-radius:10px; padding:12px 14px; backdrop-filter:blur(6px); font-size:13px; line-height:1.7; }
   #ui { top:12px; left:12px; max-width:262px; }
-  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; }
+  #ui h1 { font-size:15px; margin-bottom:6px; color:#ffd866; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .go-ess { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; color:#0d1117; background:linear-gradient(135deg,#7ee8a2,#4fc3f7); border-radius:999px; padding:3px 10px; text-decoration:none; white-space:nowrap; }
+  .go-ess:hover { filter:brightness(1.12); }
   #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
   #ui label { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
   #ui input { accent-color:#ffd866; }
@@ -50,7 +52,7 @@
 <div id="app"></div>
 
 <div id="ui" class="panel">
-  <h1>易球 · 三维宇宙映像</h1>
+  <h1>易球 · 三维宇宙映像 <a class="go-ess" href="精油卡3D/" target="_self" rel="noopener">💧 精油卡3D ›</a></h1>
   <div class="hint">🖱 拖动旋转 ｜ 滚轮缩放 ｜ 点卦隐藏整层 ｜ 点太极线消失 ｜ 空格 暂停/继续 循经</div>
   <label><input type="checkbox" id="t-rotate" /> 自动旋转</label>
   <label style="font-size:12px;color:#8b949e;display:inline-flex;align-items:center;gap:4px">循行周期<select id="t-ball" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;font-size:12px;padding:1px 4px" title="循行走满一圈 = 球体转动 360° 的共用秒数（两者始终 1:1 同步）；每经 = 周期÷12 平均分配。默认 144s = 每经 12s"><option value="72">72s/圈(每经6s)</option><option value="96">96s/圈(每经8s)</option><option value="120">120s/圈(每经10s)</option><option value="144" selected>144s/圈=球360°同步(每经12s)</option><option value="180">180s/圈(每经15s)</option><option value="216">216s/圈(每经18s)</option><option value="288">288s/圈(每经24s)</option></select></label>

@@ -309,21 +309,32 @@ function makeCard(n, name, color, isCenter){ window.__dbg.make++;
   sp.scale.set(baseW, baseH, 1);
   sp.cardBase=[baseW, baseH];
   if(!CARD_TEX[n]){
-    CARD_TEX[n]=imgLoader.load('cards/'+n+'.jpg', tex=>{
-      tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=4;
-      loadedCount++;
-      const m=mat;
-      if(m){ m.map=tex; m.needsUpdate=true; }
-      const el=document.getElementById('loading');
-      if(el) el.style.display = loadedCount<64 ? 'block' : 'none';
-      if(el && loadedCount<64) el.textContent='精油卡载入中 '+loadedCount+'/64';
-      if(loadedCount>=64 && el) el.style.display='none';
-    }, undefined, ()=>{
-      loadedCount++;
-      const el=document.getElementById('loading');
-      if(el && loadedCount<64){ el.style.display='block'; el.textContent='精油卡载入中 '+loadedCount+'/64'; }
-      if(el && loadedCount>=64) el.style.display='none';
-    });
+    // 真图加载：失败自动重试最多 3 次，避免弱网下个别卡永远停在"卦名占位卡"
+    (function loadCardImg(attempt){
+      CARD_TEX[n]=imgLoader.load('cards/'+n+'.jpg', tex=>{
+        tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=4;
+        loadedCount++;
+        const m=mat;
+        if(m){ m.map=tex; m.needsUpdate=true; }
+        const el=document.getElementById('loading');
+        if(el){
+          if(loadedCount<64){ el.style.display='block'; el.textContent='精油卡载入中 '+loadedCount+'/64'; }
+          else { el.style.display='none'; }
+        }
+      }, undefined, ()=>{
+        if(attempt<3){ setTimeout(()=>loadCardImg(attempt+1), 700*(attempt+1)); }
+        else {
+          loadedCount++;
+          const el=document.getElementById('loading');
+          if(el){
+            el.style.display='block';
+            el.textContent = loadedCount>=64
+              ? '⚠ 部分精油卡网络加载失败，请刷新页面重试'
+              : '精油卡载入中 '+loadedCount+'/64（个别失败，自动重试中）';
+          }
+        }
+      });
+    })(0);
   } else {
     // 重复引用同一纹理（同序号仅一次，不会走到）
   }
