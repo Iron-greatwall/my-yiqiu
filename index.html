@@ -174,34 +174,18 @@ const MER_COLOR = MERIDIAN.map((_,i)=> new THREE.Color().setHSL(i/12, 0.72, 0.56
 const place = {};
 place[1] = {lat:90, lon:0, layer:'N极', center:false};
 place[2] = {lat:-90, lon:0, layer:'S极', center:false};
-const ring = {
-  V:  HEX.filter(h=>yang(h)===5).map(h=>h[0]),
-  IV: HEX.filter(h=>yang(h)===4 && !CENTER.IV.includes(h[0])).map(h=>h[0]),
-  III:HEX.filter(h=>yang(h)===3 && !CENTER.III.includes(h[0])).map(h=>h[0]),
-  II: HEX.filter(h=>yang(h)===2 && !CENTER.II.includes(h[0])).map(h=>h[0]),
-  I:  HEX.filter(h=>yang(h)===1).map(h=>h[0])
+// 原书图2.04 / 图2.09 / 图2.11 实证摆位：经度 → 卦序号
+// 五层全图证，不再按文王卦序号填空；消息卦经度与表3.1 一致
+const LAYOUT = {
+  I:  {0:7, 60:15, 120:16, 180:8, 240:23, 300:24},
+  II: {0:36, 30:46, 60:40, 90:62, 120:39, 150:45, 180:35, 210:20, 240:3, 270:27, 300:4, 330:19},
+  III:{345:18, 0:11, 15:54, 45:55, 60:32, 75:48, 105:47, 120:31, 135:56, 165:53, 180:12, 195:17, 225:21, 240:42, 255:59, 285:60, 300:41, 315:22},
+  IV: {0:5, 30:34, 60:50, 90:28, 120:49, 150:33, 180:6, 210:25, 240:37, 270:61, 300:38, 330:26},
+  V:  {0:14, 60:43, 120:44, 180:13, 240:10, 300:9}
 };
-function buildSlots(L){
-  const lat = latOfLayer(L);
-  if(L==='V'||L==='I') return [0,60,120,180,240,300].map(lon=>({lat,lon}));
-  if(L==='IV'||L==='II') return Array.from({length:12},(_,i)=>({lat,lon:i*30}));
-  const s=[]; for(const b of [0,60,120,180,240,300]) for(const o of [-15,0,15]) s.push({lat,lon:b+o});
-  return s;
-}
 for(const L of ['V','IV','II','III','I']){
-  const slots = buildSlots(L); const taken = new Array(slots.length).fill(false); const msgSlots=[];
-  for(const n of ring[L]){
-    if(MESSAGE[n]!==undefined && MESSAGE[n]!==90 && MESSAGE[n]!==270){
-      const idx = slots.findIndex((s,i)=> !taken[i] && ((s.lon%360)+360)%360 === MESSAGE[n]);
-      taken[idx]=true; place[n]={lat:slots[idx].lat, lon:slots[idx].lon, layer:L, center:false}; msgSlots.push(n);
-    }
-  }
-  let si=0;
-  for(const n of ring[L]){
-    if(msgSlots.includes(n)) continue;
-    while(si<slots.length && taken[si]) si++;
-    taken[si]=true; place[n]={lat:slots[si].lat, lon:slots[si].lon, layer:L, center:false}; si++;
-  }
+  const lat = latOfLayer(L);
+  for(const lon in LAYOUT[L]) place[LAYOUT[L][lon]] = {lat, lon:Number(lon), layer:L, center:false};
 }
 // 中心双卦（完成卦/纯卦）落在 15° 经线倍数上，确保整体全部在经纬交汇点
 const CENTER_LON = {III:[330,30], IV:[15,45,75], II:[15,45,75]};
