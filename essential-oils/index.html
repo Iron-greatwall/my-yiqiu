@@ -21,6 +21,9 @@
   .corner-btn:hover { opacity:1; border-color:#ffd866; color:#ffd866; }
   .corner-btn.cb-ui { left:12px; }
   .corner-btn.cb-layers { right:12px; }
+  .corner-btn.cb-mer { top:auto; bottom:46px; right:12px; }
+  #merLegend .merClose { position:absolute; top:-10px; right:-8px; width:20px; height:20px; border-radius:50%; background:#21262d; border:1px solid #30363d; color:#8b949e; font-size:11px; line-height:18px; text-align:center; padding:0; cursor:pointer; z-index:2; }
+  #merLegend .merClose:hover { color:#ffd866; border-color:#ffd866; }
   #ui .hint { color:#8b949e; font-size:12px; margin-bottom:10px; }
   #ui label { display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
   #ui input { accent-color:#ffd866; }
@@ -77,6 +80,7 @@
     #ui h1 { font-size:14px; }
     #pauseBadge { top:8px; font-size:12px; }
     #merLegend { bottom:44px; right:8px; }
+    .corner-btn.cb-mer { bottom:44px; right:8px; }
     #credits { bottom:8px; right:8px; font-size:10px; }
     #info { bottom:8px; left:8px; min-width:0; max-width:calc(100vw - 16px); }
   }
@@ -87,6 +91,7 @@
 
 <button id="btnUi" class="corner-btn cb-ui" style="display:none" title="显示左上控制面板">⚙ 控制</button>
 <button id="btnLayers" class="corner-btn cb-layers" style="display:none" title="显示右上图层面板">🗂 图层</button>
+<button id="btnMer" class="corner-btn cb-mer" style="display:none" title="显示右下循行图例">🕐 循行</button>
 
 <div id="ui" class="panel">
   <h1><span>易球 · 精油卡三维映像</span><button id="uiClose" class="xbtn" title="收起此面板（点左上 ⚙ 可恢复）">✕</button></h1>
@@ -116,7 +121,7 @@
 
 <div id="info" class="panel aux"></div>
 <div id="cardInfo" class="cardInfo" style="display:none"></div>
-<div id="merLegend" class="panel aux"></div>
+<div id="merLegend" class="panel aux"><button id="merClose" class="merClose" title="收起循行图例（点右下 🕐 循行 恢复）">✕</button></div>
 <div id="startGate"><div class="box"><div class="t1">🧭 点击屏幕任意处 · 开始循行</div><div class="t2">白点停在 <b>0h·24h 起点（子时胆经）</b>正对您；点击后白点跑满一圈 ⇔ 球体同步转满 360°（默认 144s/圈）<br>按 <b>空格</b> 可随时暂停 / 继续</div></div></div>
 <div id="pauseBadge" class="panel">⏸ 已暂停（空格继续）</div>
 <div id="loading" class="panel" style="top:52px;left:50%;transform:translateX(-50%);color:#ffd866;display:none;"></div>
@@ -367,10 +372,10 @@ function makeGuaTex(n, name, upper, lower, color){
   x.font=`${Math.round(h*0.13)}px "PingFang SC",sans-serif`; x.fillStyle='#e6edf3';
   x.fillText((TRIGRAM_GLYPH[upper]||'')+'　'+(TRIGRAM_GLYPH[lower]||''), w/2, h*0.52);
   x.fillStyle='#6e7681'; x.font=`bold ${Math.round(h*0.036)}px sans-serif`;
-  x.fillText('上'+upper+' · 下'+lower, w/2, h*0.65);
+  x.fillText('上'+upper+' · 下'+lower, w/2, h*0.60);
   // 六爻横线：下卦三爻在下、上卦三爻在上；1=阳实线 0=阴断线
   const lines=[...TRIGRAM_LINES[lower], ...TRIGRAM_LINES[upper]];
-  const cx=w/2, barW=Math.round(w*0.52), lh=Math.round(h*0.073), yTop=Math.round(h*0.76);
+  const cx=w/2, barW=Math.round(w*0.52), lh=Math.round(h*0.060), yTop=Math.round(h*0.67);
   for(let i=0;i<6;i++){
     const y=yTop+(5-i)*lh;
     if(lines[i]===1){ x.fillStyle=color; x.fillRect(cx-barW/2, y-2, barW, 4); }
@@ -425,37 +430,51 @@ for(const h of HEX){ window.__dbg.loop++;
 }
 const cardSprites = cardRecs.map(c=>c.sp);
 
-// ============ 十二经络循行（新版 · Z字折返 · 独立图层） ============
-// 按原文规则重建循行路径（起点 = 三层(赤道) hex55/hex56 之间的交汇点 lon 270 = 24h 点 = 0h）：
-//   横向(沿纬线)每折+15° = 虚线；纵向(沿经线上/下) = 实线；
-//   在 III(赤道) ↔ 60°N/60°S 之间来回折返（转折只在一/三/五层，途经 II/IV 层）；
-//   12 段对应十二经络；整条路径沿球面转满 360° 回到起点。
-// 需求K：经络循行图与球体分属两个图层 → 各自按自己方向/速度独立旋转。
+// ============ 十二经络循行（按原书图8.01/8.03 + 表8.1 重建 · 独立图层） ============
+// 原书规则（表8.1）：每条经有固定的"从…到…"部位与方向，四部位按
+//   乳房(breast) → 手臂(arm) → 面容(face) → 腿(leg) → 乳房… 循环衔接：
+//     肺/心/心包(阴)：乳房→手臂(向上)；大肠/小肠/三焦(阳)：手臂→面容(向下)；
+//     胃/膀胱/胆(阳)：面容→腿(向下)；脾/肾/肝(阴)：腿→乳房(向上)。
+//   实线=本经纵向(起点部位→终点部位)；虚线=终点部位处横向接到下一时辰点。
+//   每个时辰点颜色：橙(face)=本经起点属"手臂/面容"(上半身)，绿(breast)=起点属"腿/乳房"(下半身)。
+// 起点 = 子时胆经(GB, 面容→腿)，lon 270 = 24h 点；每经占 30° 经度，12 经走满 360° 闭合。
 const flowGroup = new THREE.Group();   // 经络独立图层（不随球体旋转，另行驱动）
 const FLOW_R = R*1.02;                 // 紧贴球面（略外移避免与卦点重叠）
-const STEP = +15;                      // 经度递增 → 整条循行反向绕球（经络跟着走）
-const FLOW_PERIOD = 144;               // 一个完整循行(12时辰/360°)秒数（72→144 再放慢一倍，每经=12s；球体同步一整圈）
-let _lat = 0, _lon = 270;              // 起点：三层 · 55/56 之间
-const knots = [];                      // 折返节点（仅在一/三/五层）
-function _knot(){ knots.push({lat:_lat, lon:_lon}); }
-_knot();
-const segs = [];                       // {type:'solid'|'dashed', color, a, b}
-// 经络按「子午流注」时辰正序沿循行推进（绕球方向已与旧版相反，经络跟着走）：
-//   起点 0h=24h = 子时(23-01)胆经 → 每过 2h(=1/12圈)换一经：
-//   0h 子胆 → 2h 丑肝 → 4h 寅肺 → 6h 卯大肠 → 8h 辰胃 → 10h 巳脾 → 12h 午心 →
-//   14h 未小肠 → 16h 申膀胱 → 18h 酉肾 → 20h 戌心包 → 22h 亥三焦 → 24h 回到起点子胆。
-// 于是：6h(1/4圈)=大肠经、12h(半圈)=心经、18h(3/4圈)=肾经、0/24h(起点)=胆经。
-// 折向交替：偶数段先向上(60°N)、奇数段先向下(60°S)。
-const LABEL_ORDER = [10,11,0,1,2,3,4,5,6,7,8,9];   // 子丑寅卯辰巳午未申酉戌亥（=MERIDIAN 下标顺序）
+const STEP = +30;                      // 每条经占 30° 经度（12 经 = 360°）
+const FLOW_PERIOD = 144;               // 一个完整循行(12时辰/360°)秒数；每经=12s；球体同步一整圈
+// 四部位在球面上的纬度（依图8.03：手臂在北、腿在南、面容/乳房在赤道两侧）
+const PART_LAT = {arm:60, face:15, breast:-15, leg:-60};
+// 表8.1：按 MERIDIAN 下标(0=寅肺…11=丑肝) 的 [起点部位,终点部位,时辰点颜色]
+const MER_PART = [
+  ['breast','arm','breast'],   // 0  寅 肺 Lu   乳房→手臂 向上(绿点)
+  ['arm','face','face'],       // 1  卯 大肠 LI  手臂→面容 向下(橙点)
+  ['face','leg','face'],       // 2  辰 胃 St   面容→腿   向下(橙点)
+  ['leg','breast','breast'],   // 3  巳 脾 Sp   腿→乳房   向上(绿点)
+  ['breast','arm','breast'],   // 4  午 心 Ht   乳房→手臂 向上(绿点)
+  ['arm','face','face'],       // 5  未 小肠 SI  手臂→面容 向下(橙点)
+  ['face','leg','face'],       // 6  申 膀胱 UB  面容→腿   向下(橙点)
+  ['leg','breast','breast'],   // 7  酉 肾 Kd   腿→乳房   向上(绿点)
+  ['breast','arm','breast'],   // 8  戌 心包 Pc  乳房→手臂 向上(绿点)
+  ['arm','face','face'],       // 9  亥 三焦 TH  手臂→面容 向下(橙点)
+  ['face','leg','face'],       // 10 子 胆 GB   面容→腿   向下(橙点)
+  ['leg','breast','breast']    // 11 丑 肝 Lv   腿→乳房   向上(绿点)
+];
+const LABEL_ORDER = [10,11,0,1,2,3,4,5,6,7,8,9];   // 循行顺序：子胆→丑肝→寅肺→…→亥三焦（起点=24h）
+const knots = [], segs = [];                       // segs={type:'solid'|'dashed', color, a, b}
+let _lon = 270;                                     // 起点经度 24h
+knots.push({lat:PART_LAT[MER_PART[LABEL_ORDER[0]][0]], lon:_lon});
 for(let k=0;k<12;k++){
-  const c = MER_COLOR[LABEL_ORDER[k]];
-  const up = (k%2===0);
-  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
-  _lat=up?60:-60; _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
-  _lon+=STEP; _knot(); segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
-  _lat=0;        _knot(); segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1]});
+  const mi = LABEL_ORDER[k], part = MER_PART[mi], c = MER_COLOR[mi];
+  const latFrom = PART_LAT[part[0]], latTo = PART_LAT[part[1]];
+  // ① 实线：本经从起点部位纵向走到终点部位（同一经度）
+  knots.push({lat:latTo, lon:_lon});
+  segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
+  // ② 虚线：在终点部位纬度，横向接到下一时辰点（终点部位 = 下一经起点部位，闭环）
+  _lon += STEP;
+  knots.push({lat:latTo, lon:_lon});
+  segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
 }
-// 收尾：12 段(每段经度 +30°)后 lon=270+360=630(≡270)、lat=0 → 与起点重合，构成闭合环（24h 回到起点）
+// 12 经后 lon=270+360=630(≡270)、lat=起点部位 → 与起点重合，闭合环（24h 回到起点）
 // 把每段展开成贴球面的弧（密采样）：纵向弧经度不变、纬度插值（途经 II/IV 层）；横向弧纬度不变、经度插值
 function arcPoints(a, b, type){
   const out=[];
@@ -818,6 +837,7 @@ function bindPanelToggle(panelId, closeId, btnId){
 }
 bindPanelToggle('ui','uiClose','btnUi');
 bindPanelToggle('layers','layersClose','btnLayers');
+bindPanelToggle('merLegend','merClose','btnMer');   // 循行图例卡：点 ✕ 收起 → 右下 🕐 循行 恢复
 // 手机窄屏：默认收起两面板（观感干净、不遮球体），点角落 ⚙/🗂 可随时展开
 if(innerWidth<=700){
   ['ui','layers'].forEach(pid=>{ const el=document.getElementById(pid), btn=document.getElementById(pid==='ui'?'btnUi':'btnLayers');
