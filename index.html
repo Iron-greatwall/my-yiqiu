@@ -45,19 +45,19 @@
   #info b { color:#ffd866; }
   #info .big { font-size:18px; }
   #credits { position:fixed; bottom:12px; right:12px; z-index:10; color:#6e7681; font-size:11px; }
-  #merLegend { bottom:46px; right:12px; left:auto; transform:none; max-width:min(320px,88vw); display:flex; flex-wrap:wrap; gap:4px 6px; justify-content:flex-end; padding:7px 9px; }
-  #merLegend .chip { display:flex; align-items:center; gap:4px; font-size:10px; white-space:nowrap; padding:2px 6px; border-radius:7px; border:1px solid transparent; transition:background .15s, border-color .15s; }
-  #merLegend .chip .sw { width:8px; height:8px; border-radius:2px; flex:0 0 auto; }
+  #merLegend { bottom:46px; right:12px; left:auto; transform:none; width:min(352px,90vw); max-width:min(352px,90vw); display:grid; grid-template-columns:repeat(3,1fr); gap:4px 5px; padding:8px 9px 9px; }
+  #merLegend .chip { display:flex; align-items:center; justify-content:center; gap:3px; font-size:10px; white-space:nowrap; padding:3px 2px; border-radius:6px; border:1px solid transparent; transition:background .15s, border-color .15s; }
+  #merLegend .chip .sw { width:7px; height:7px; border-radius:2px; flex:0 0 auto; }
   #merLegend .chip b { color:#e6edf3; font-weight:600; }
   #merLegend .chip span { color:#8b949e; }
   #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
   #merLegend .chip.on b { color:#ffd866; }
   #merLegend .chip.on span { color:#e6edf3; }
-  #merLegend .partLegend { display:flex; flex-wrap:wrap; align-items:center; gap:3px 7px; width:100%; justify-content:flex-end; padding:0 2px 5px; margin-bottom:3px; border-bottom:1px dashed #30363d; }
-  #merLegend .partLegend .pl-title { color:#6e7681; font-size:9px; }
-  #merLegend .pl-item { display:flex; align-items:center; gap:3px; font-size:9px; color:#8b949e; white-space:nowrap; }
-  #merLegend .pl-dash { width:11px; height:0; border-top:2px dashed var(--c); display:inline-block; }
-  #merLegend .pl-dot { width:7px; height:7px; border-radius:50%; background:var(--c); display:inline-block; box-shadow:0 0 4px var(--c); }
+  #merLegend .partLegend { grid-column:1 / -1; display:flex; flex-wrap:nowrap; align-items:center; gap:2px 6px; justify-content:space-between; padding:0 3px 6px; margin-bottom:5px; border-bottom:1px dashed #30363d; }
+  #merLegend .partLegend .pl-title { color:#ffd866; font-size:11px; font-weight:700; letter-spacing:.5px; white-space:nowrap; }
+  #merLegend .pl-item { display:flex; align-items:center; gap:3px; font-size:10px; color:#c9d1d9; white-space:nowrap; }
+  #merLegend .pl-dash { width:12px; height:0; border-top:2px dashed var(--c); display:inline-block; }
+  #merLegend .pl-dot { width:8px; height:8px; border-radius:50%; background:var(--c); display:inline-block; box-shadow:0 0 4px var(--c); }
   #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
   #startGate { position:fixed; inset:0; z-index:40; cursor:pointer; user-select:none; background:rgba(13,17,23,.30); }
   #startGate .box { position:absolute; right:14px; bottom:64px; width:min(290px,80vw); background:rgba(22,27,34,.94); border:1px solid rgba(255,216,102,.5); border-radius:12px; padding:12px 14px; backdrop-filter:blur(4px); box-shadow:0 8px 30px rgba(0,0,0,.5); text-align:left; }
