@@ -53,6 +53,11 @@
   #merLegend .chip.on { background:rgba(255,216,102,.18); border-color:#ffd866; }
   #merLegend .chip.on b { color:#ffd866; }
   #merLegend .chip.on span { color:#e6edf3; }
+  #merLegend .partLegend { display:flex; flex-wrap:wrap; align-items:center; gap:3px 7px; width:100%; justify-content:flex-end; padding:0 2px 5px; margin-bottom:3px; border-bottom:1px dashed #30363d; }
+  #merLegend .partLegend .pl-title { color:#6e7681; font-size:9px; }
+  #merLegend .pl-item { display:flex; align-items:center; gap:3px; font-size:9px; color:#8b949e; white-space:nowrap; }
+  #merLegend .pl-dash { width:11px; height:0; border-top:2px dashed var(--c); display:inline-block; }
+  #merLegend .pl-dot { width:7px; height:7px; border-radius:50%; background:var(--c); display:inline-block; box-shadow:0 0 4px var(--c); }
   #pauseBadge { top:12px; left:50%; transform:translateX(-50%); padding:5px 12px; font-size:13px; color:#ffd866; display:none; }
   #startGate { position:fixed; inset:0; z-index:40; cursor:pointer; user-select:none; background:rgba(13,17,23,.30); }
   #startGate .box { position:absolute; right:14px; bottom:64px; width:min(290px,80vw); background:rgba(22,27,34,.94); border:1px solid rgba(255,216,102,.5); border-radius:12px; padding:12px 14px; backdrop-filter:blur(4px); box-shadow:0 8px 30px rgba(0,0,0,.5); text-align:left; }
@@ -327,43 +332,46 @@ for(const h of HEX){
 //     肺/心/心包(阴)：乳房→手臂(向上)；大肠/小肠/三焦(阳)：手臂→面容(向下)；
 //     胃/膀胱/胆(阳)：面容→腿(向下)；脾/肾/肝(阴)：腿→乳房(向上)。
 //   实线=本经纵向(起点部位→终点部位)；虚线=终点部位处横向接到下一时辰点。
-//   每个时辰点颜色：橙(face)=本经起点属"手臂/面容"(上半身)，绿(breast)=起点属"腿/乳房"(下半身)。
-// 起点 = 子时胆经(GB, 面容→腿)，lon 270 = 24h 点；每经占 30° 经度，12 经走满 360° 闭合。
+//   四部位色（图8.01图例）：手臂arm红虚线 / 面部face橙点 / 胸部breast绿点 / 腿脚leg蓝虚线。
+// 起点 = 子时胆经(GB, 面部→腿脚)，lon 300 = 24h 点(消息卦24复)；每经占 30° 经度，12 经走满 360° 闭合。
 const flowGroup = new THREE.Group();   // 经络独立图层（不随球体旋转，另行驱动）
 const FLOW_R = R*1.02;                 // 紧贴球面（略外移避免与卦点重叠）
 const STEP = +30;                      // 每条经占 30° 经度（12 经 = 360°）
 const FLOW_PERIOD = 144;               // 一个完整循行(12时辰/360°)秒数；每经=12s；球体同步一整圈
-// 四部位在球面上的纬度（依图8.03：手臂在北、腿在南、面容/乳房在赤道两侧）
-const PART_LAT = {arm:60, face:15, breast:-15, leg:-60};
-// 表8.1：按 MERIDIAN 下标(0=寅肺…11=丑肝) 的 [起点部位,终点部位,时辰点颜色]
+// 四部位纬度：面部/胸部贴赤道（-2°/+2°靠颜色区分），手臂高、腿脚低
+const PART_LAT = {arm:58, face:2, breast:-2, leg:-58};
+// 四部位虚线颜色（图8.01图例）：arm红 / face橙 / breast绿 / leg蓝
+const PART_COLOR = {arm:new THREE.Color(0xe5534d), face:new THREE.Color(0xff9f1c),
+                    breast:new THREE.Color(0x4ec94e), leg:new THREE.Color(0x3d8bff)};
+// 表8.1：按 MERIDIAN 下标(0=寅肺…11=丑肝) 的 [起点部位,终点部位]
 const MER_PART = [
-  ['breast','arm','breast'],   // 0  寅 肺 Lu   乳房→手臂 向上(绿点)
-  ['arm','face','face'],       // 1  卯 大肠 LI  手臂→面容 向下(橙点)
-  ['face','leg','face'],       // 2  辰 胃 St   面容→腿   向下(橙点)
-  ['leg','breast','breast'],   // 3  巳 脾 Sp   腿→乳房   向上(绿点)
-  ['breast','arm','breast'],   // 4  午 心 Ht   乳房→手臂 向上(绿点)
-  ['arm','face','face'],       // 5  未 小肠 SI  手臂→面容 向下(橙点)
-  ['face','leg','face'],       // 6  申 膀胱 UB  面容→腿   向下(橙点)
-  ['leg','breast','breast'],   // 7  酉 肾 Kd   腿→乳房   向上(绿点)
-  ['breast','arm','breast'],   // 8  戌 心包 Pc  乳房→手臂 向上(绿点)
-  ['arm','face','face'],       // 9  亥 三焦 TH  手臂→面容 向下(橙点)
-  ['face','leg','face'],       // 10 子 胆 GB   面容→腿   向下(橙点)
-  ['leg','breast','breast']    // 11 丑 肝 Lv   腿→乳房   向上(绿点)
+  ['breast','arm'],   // 0  寅 肺 Lu   胸部→手臂 向上
+  ['arm','face'],     // 1  卯 大肠 LI  手臂→面部 向下
+  ['face','leg'],     // 2  辰 胃 St   面部→腿脚 向下
+  ['leg','breast'],   // 3  巳 脾 Sp   腿脚→胸部 向上
+  ['breast','arm'],   // 4  午 心 Ht   胸部→手臂 向上
+  ['arm','face'],     // 5  未 小肠 SI  手臂→面部 向下
+  ['face','leg'],     // 6  申 膀胱 UB  面部→腿脚 向下
+  ['leg','breast'],   // 7  酉 肾 Kd   腿脚→胸部 向上
+  ['breast','arm'],   // 8  戌 心包 Pc  胸部→手臂 向上
+  ['arm','face'],     // 9  亥 三焦 TH  手臂→面部 向下
+  ['face','leg'],     // 10 子 胆 GB   面部→腿脚 向下
+  ['leg','breast']    // 11 丑 肝 Lv   腿脚→胸部 向上
 ];
 const LABEL_ORDER = [10,11,0,1,2,3,4,5,6,7,8,9];   // 循行顺序：子胆→丑肝→寅肺→…→亥三焦（起点=24h）
-const knots = [], segs = [];                       // segs={type:'solid'|'dashed', color, a, b}
-let _lon = 270;                                     // 起点经度 24h
+const knots = [], segs = [];                       // segs={type:'solid'|'dashed', color, a, b, mer}
+let _lon = 300;                                     // 起点经度：胆经(子时)消息卦24复=300°（表3.1）
 knots.push({lat:PART_LAT[MER_PART[LABEL_ORDER[0]][0]], lon:_lon});
 for(let k=0;k<12;k++){
-  const mi = LABEL_ORDER[k], part = MER_PART[mi], c = MER_COLOR[mi];
+  const mi = LABEL_ORDER[k], part = MER_PART[mi];
   const latFrom = PART_LAT[part[0]], latTo = PART_LAT[part[1]];
-  // ① 实线：本经从起点部位纵向走到终点部位（同一经度）
+  // ① 实线：本经从起点部位纵向走到终点部位（同一经度），用经络色
   knots.push({lat:latTo, lon:_lon});
-  segs.push({type:'solid', color:c, a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
-  // ② 虚线：在终点部位纬度，横向接到下一时辰点（终点部位 = 下一经起点部位，闭环）
+  segs.push({type:'solid', color:MER_COLOR[mi], a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
+  // ② 虚线：在终点部位纬度，横向接到下一时辰点，用该部位色（红/橙/绿/蓝）
   _lon += STEP;
   knots.push({lat:latTo, lon:_lon});
-  segs.push({type:'dashed', color:c, a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
+  segs.push({type:'dashed', color:PART_COLOR[part[1]], a:knots[knots.length-2], b:knots[knots.length-1], mer:mi});
 }
 // 12 经后 lon=270+360=630(≡270)、lat=起点部位 → 与起点重合，闭合环（24h 回到起点）
 // 把每段展开成贴球面的弧（密采样）：纵向弧经度不变、纬度插值（途经 II/IV 层）；横向弧纬度不变、经度插值
@@ -381,7 +389,7 @@ function arcPoints(a, b, type){
 // 密采样路径（贴球面）+ 每段类型/经络序号/累计弧长，供着色、流动闪动、图例联动
 const flowPts=[], flowCol=[], flowType=[], flowMer=[];
 for(const s of segs){ const ap=arcPoints(s.a, s.b, s.type); const from=flowPts.length?1:0;
-  const mer=MER_COLOR.indexOf(s.color);
+  const mer=(s.mer!==undefined)?s.mer:MER_COLOR.indexOf(s.color);
   if(flowPts.length){ // 转角处那一小段归"下一段"的类型，保证实线/虚线边界精确
     const j=flowPts.length-1; flowType[j]=s.type; flowCol[j]=s.color; flowMer[j]=mer; }
   for(let i=from;i<ap.length;i++){ flowPts.push(ap[i]); flowCol.push(s.color); flowType.push(s.type); flowMer.push(mer); } }
@@ -397,7 +405,7 @@ function meridianAt(t){ return flowMer[flowLoc(t).i]; }
 // 纵向段=实线；横向段=按沿线距离挖间隙 → 虚线
 const loopPts = flowPts.slice(0, flowPts.length-1);   // 末点与起点重合，去掉以免闭合曲线退化
 const flowCurve = new THREE.CatmullRomCurve3(loopPts, true, 'centripetal', 0.5);
-const TSEG = 1400, TRAD = 0.045, TRSEG = 8, RING = TRSEG+1;   // 管径 0.045：清晰可见
+const TSEG = 1400, TRAD = 0.026, TRSEG = 8, RING = TRSEG+1;   // 管径 0.026：细线不挡卦色
 const flowTubeGeo = new THREE.TubeGeometry(flowCurve, TSEG, TRAD, TRSEG, true);
 { // 顶点属性：经络色 / 是否横向(虚线) / 沿线距离 / 沿线比例
   const N = flowTubeGeo.attributes.position.count;
@@ -437,7 +445,7 @@ const FLOW_FRAG = `
     float bU = vT*12.0 - s*12.0;                           // 以"一经络=1"计；>0 = 在前方
     float lit = (1.0 - smoothstep(0.0, 0.95, max(0.0,-bU)))   // 身后彩尾（收短≈1 经，紧贴灯头不漫到侧面）
               * (1.0 - smoothstep(0.0, 0.30, max(0.0, bU)));  // 前方短预告（更贴灯头）
-    float core = 1.0 - smoothstep(0.004, 0.035, abs(x));   // 头心白炽
+    float core = 1.0 - smoothstep(0.003, 0.022, abs(x));   // 头心白炽（更窄，不挡卦色）
     float side  = dot(normalize(vWorld), normalize(cameraPosition));
     float front = smoothstep(-0.20, 0.25, side);           // >0 = 正面(朝我)
     vec3 base = vCol*(0.24 + 1.15*lit) + core*vec3(1.0,0.97,0.90);  // 尾=经络本色，头=暖白
@@ -454,20 +462,20 @@ flowGroup.add(flowLine);
 
 // 循行"头灯"：白炽小珠 + 暖光晕，贴着路径前沿(弧距=s)走 → 走到哪、亮到哪，且始终正对观众
 const headDotMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, depthTest:false});
-const headDot = new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), headDotMat);
+const headDot = new THREE.Mesh(new THREE.SphereGeometry(0.075,16,16), headDotMat);
 const _hc=document.createElement('canvas'); _hc.width=_hc.height=128;
 const _hg=_hc.getContext('2d'); const _hgr=_hg.createRadialGradient(64,64,2,64,64,62);
 _hgr.addColorStop(0,'rgba(255,255,255,0.95)'); _hgr.addColorStop(0.35,'rgba(255,244,210,0.45)'); _hgr.addColorStop(1,'rgba(255,230,180,0)');
 _hg.fillStyle=_hgr; _hg.fillRect(0,0,128,128);
 const headHalo = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(_hc), transparent:true,
   depthTest:false, blending:THREE.AdditiveBlending, opacity:0.95}));
-headHalo.scale.set(1.15,1.15,1);
+headHalo.scale.set(0.72,0.72,1);
 const headGroup = new THREE.Group(); headGroup.add(headHalo); headGroup.add(headDot);
 flowGroup.add(headGroup);
 const _white=new THREE.Color(1,1,1), _mc=new THREE.Color();
 
 // 上下箭头（实线段中点，指向行进方向）—— 随循行线一并调细
-const arrowGeo = new THREE.ConeGeometry(0.075, 0.22, 10);
+const arrowGeo = new THREE.ConeGeometry(0.05, 0.15, 10);
 for(const s of segs){ if(s.type!=='solid') continue;
   const ap=arcPoints(s.a, s.b, 'solid'); const m0=Math.floor(ap.length/2);
   const mid=ap[m0], nxt=ap[Math.min(ap.length-1, m0+1)];
@@ -594,6 +602,14 @@ if(innerWidth<=700){
 const merChips = [];
 (function(){
   const box=document.getElementById('merLegend');
+  // 图8.01 四部位图例：手臂(红虚线) / 面部(橙点) / 胸部(绿点) / 腿脚(蓝虚线)；面部+胸部同在赤道，靠颜色区分
+  const pl=document.createElement('div'); pl.className='partLegend';
+  pl.innerHTML='<span class="pl-title">部位</span>'
+    +'<span class="pl-item"><i class="pl-dash" style="--c:#e5534d"></i>手臂</span>'
+    +'<span class="pl-item"><i class="pl-dot" style="--c:#ff9f1c"></i>面部</span>'
+    +'<span class="pl-item"><i class="pl-dot" style="--c:#4ec94e"></i>胸部</span>'
+    +'<span class="pl-item"><i class="pl-dash" style="--c:#3d8bff"></i>腿脚</span>';
+  box.appendChild(pl);
   MERIDIAN.forEach((m,i)=>{
     const c='#'+MER_COLOR[i].getHexString();
     const chip=document.createElement('div'); chip.className='chip';
